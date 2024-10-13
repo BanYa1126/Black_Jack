@@ -1,0 +1,18 @@
+<html>
+<body>
+    <h1>BlackJack Site</h1>
+    <button id="startBattleButton">딜러랑 1vs1 배틀 시작하기 </button>
+    
+    <div id="playerArea">
+            <h2>플레이어의 카드</h2>
+            <div id="playerCards"></div>
+            <p>점수: <span id="playerScore"></span></p>
+        </div>
+
+        <div id="dealerArea">
+            <h2>딜러의 카드</h2>
+            <div id="dealerCards"></div>
+            <p>점수: <span id="dealerScore"></span></p>
+        </div>
+    </body>
+</html>
