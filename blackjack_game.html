@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c3e50;
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #dealer, #player {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+
+        .card {
+            width: 100px;
+            height: 140px;
+            margin: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blackjack Game</h1>
+    
+    <div id="dealer">
+        <h2>Dealer</h2>
+        <div id="dealer-cards"></div>
+    </div>
+
+    <div id="player">
+        <h2>Player</h2>
+        <div id="player-cards"></div>
+    </div>
+
+    <div id="controls">
+        <button id="hit-btn" onclick="hit()">Hit</button>
+        <button id="stay-btn" onclick="stay()">Stay</button>
+        <button id="double-btn" onclick="doubleDown()">Double Down</button>
+        <button id="surrender-btn" onclick="surrender()">Surrender</button>
+    </div>
+
+    <script>
+        const cardBack = "cards/Back_Side.png"; // 뒷면 카드 이미지 경로
+        let dealerCards = [];
+        let playerCards = [];
+        let playerMoney = Math.floor(Math.random() * 9000) + 1000; // $1,000 ~ $10,000 랜덤 자금 설정
+        let decks = [];
+
+        // 카드 덱 생성: 4 ~ 8 덱 사용
+        function createDecks() {
+            const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+            const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+            for (let i = 0; i < Math.floor(Math.random() * 5) + 4; i++) {
+                for (let suit of suits) {
+                    for (let value of values) {
+                        decks.push({ value, suit, img: `cards/${value}_of_${suit}.png` });
+                    }
+                }
+            }
+            shuffleDecks();
+        }
+
+        // 카드 덱 섞기
+        function shuffleDecks() {
+            for (let i = decks.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [decks[i], decks[j]] = [decks[j], decks[i]];
+            }
+        }
+
+        // 게임 시작 시 카드 나누기
+        function dealCards() {
+            // 딜러 카드: 첫 카드는 오픈, 나머지는 뒷면
+            dealerCards.push(decks.pop());
+            dealerCards.push(decks.pop());
+            document.getElementById("dealer-cards").innerHTML = `
+                <img class="card" src="${dealerCards[0].img}" alt="dealer card">
+                <img class="card" src="${cardBack}" alt="dealer card back">
+            `;
+
+            // 플레이어 카드 2장
+            playerCards.push(decks.pop());
+            playerCards.push(decks.pop());
+            updatePlayerCards();
+        }
+
+        // 플레이어 카드 화면에 표시
+        function updatePlayerCards() {
+            const playerCardsDiv = document.getElementById("player-cards");
+            playerCardsDiv.innerHTML = "";
+            playerCards.forEach(card => {
+                playerCardsDiv.innerHTML += `<img class="card" src="${card.img}" alt="player card">`;
+            });
+        }
+
+        // Hit 버튼: 카드를 한 장 받는 로직
+        function hit() {
+            if (playerCards.length < 5) { // 플레이어는 최대 5장의 카드를 받을 수 있다.
+                playerCards.push(decks.pop());
+                updatePlayerCards();
+            }
+            document.getElementById('hit-btn').disabled = true; // 한번 카드를 받으면 Hit는 비활성화
+        }
+
+        // Stay 버튼: 그대로 유지
+        function stay() {
+            // 딜러는 규칙에 따라 카드를 더 받거나 게임을 종료한다.
+            // 추가 로직 필요
+            alert('플레이어가 Stay를 선택했습니다.');
+        }
+
+        // Double Down 버튼: 베팅금액을 2배로 증가
+        function doubleDown() {
+            alert('Double Down! 베팅 금액이 2배로 증가합니다.');
+            // 추가 베팅 로직 필요
+        }
+
+        // Surrender 버튼: 항복하고 베팅 금액의 절반을 돌려받음
+        function surrender() {
+            alert('Surrender! 베팅 금액의 절반을 돌려받습니다.');
+            // 항복 로직 추가 필요
+        }
+
+        // 페이지 로드 시 게임 시작
+        window.onload = function() {
+            createDecks();
+            dealCards();
+        }
+    </script>
+</body>
+</html>
