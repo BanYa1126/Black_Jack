@@ -1,18 +1,86 @@
-<html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블랙잭 게임</title>
+    <style>
+        .card {
+            width: 100px;
+            height: 150px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            background-color: white;
+            position: relative;
+            display: inline-block;
+            margin: 5px;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+        }
+        .card .suit {
+            font-size: 20px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
+        .card .number {
+            font-size: 24px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .card .suit-bottom {
+            font-size: 20px;
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+        .hearts, .diamonds {
+            color: red;
+        }
+        .spades, .clubs {
+            color: black;
+        }
+    </style>
+</head>
 <body>
-    <h1>DEU_Land BlackJack</h1>
-    <button id="startBattleButton">Start Black Jack</button>
-    
-    <div id="playerArea">
-            <h2>플레이어의 카드</h2>
-            <div id="playerCards"></div>
-            <p>점수: <span id="playerScore"></span></p>
-        </div>
+    <div id="card-container"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+            const numbers = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const cardContainer = document.getElementById('card-container');
 
-        <div id="dealerArea">
-            <h2>딜러의 카드</h2>
-            <div id="dealerCards"></div>
-            <p>점수: <span id="dealerScore"></span></p>
-        </div>
-    </body>
+            function renderCard(suit, number) {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${suit}`;
+                cardElement.innerHTML = `
+                    <div class="suit ${suit}">${getSuitSymbol(suit)}</div>
+                    <div class="number">${number}</div>
+                    <div class="suit-bottom ${suit}">${getSuitSymbol(suit)}</div>
+                `;
+                cardContainer.appendChild(cardElement);
+            }
+
+            function getSuitSymbol(suit) {
+                switch (suit) {
+                    case 'hearts': return '♥';
+                    case 'diamonds': return '♦';
+                    case 'clubs': return '♣';
+                    case 'spades': return '♠';
+                }
+            }
+
+            function addRandomCard() {
+                const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+                const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
+                renderCard(randomSuit, randomNumber);
+            }
+
+            addRandomCard();
+            addRandomCard();
+        });
+    </script>
+</body>
 </html>
