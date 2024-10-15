@@ -14,16 +14,46 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            height: 100vh;
         }
-        
-        #dealer, #player {
+
+        h1 {
+            position: absolute;
+            top: 10px;
+            text-align: center;
+            margin: 0;
+            width: 100%;
+        }
+
+        #dealer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 60px;
+        }
+
+        #player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            bottom: 100px;
+        }
+
+        #player h2 {
             display: flex;
             justify-content: center;
-            margin: 20px;
+            align-items: center;
+            gap: 10px;
         }
 
         #controls {
-            margin-top: 20px;
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
 
         .card {
@@ -34,7 +64,6 @@
 
         button {
             padding: 10px 20px;
-            margin: 5px;
             background-color: #3498db;
             color: white;
             border: none;
@@ -57,7 +86,7 @@
     </div>
 
     <div id="player">
-        <h2>Player</h2>
+        <h2>Player - $<span id="player-money"></span></h2>
         <div id="player-cards"></div>
     </div>
 
@@ -69,23 +98,28 @@
     </div>
 
     <script>
-        const cardBack = "cards/Back_Side.png"; // 뒷면 카드 이미지 경로
+        const cardBack = "cards/Back_Side.png";
         let dealerCards = [];
         let playerCards = [];
-        let playerMoney = Math.floor(Math.random() * 9000) + 1000; // $1,000 ~ $10,000 랜덤 자금 설정
+        let playerMoney = Math.floor(Math.random() * 9000) + 1000;
+        let betAmount = 100;
         let decks = [];
 
-        // 카드 덱 생성: 4 ~ 8 덱 사용
+        // 카드 덱 생성: 4 ~ 8 덱 중 하나 선택하여 생성
         function createDecks() {
             const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
             const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-            for (let i = 0; i < Math.floor(Math.random() * 5) + 4; i++) {
+            const numberOfDecks = Math.floor(Math.random() * 5) + 4;
+            decks = [];
+
+            for (let i = 0; i < numberOfDecks; i++) {
                 for (let suit of suits) {
                     for (let value of values) {
                         decks.push({ value, suit, img: `cards/${value}_of_${suit}.png` });
                     }
                 }
             }
+
             shuffleDecks();
         }
 
@@ -99,7 +133,8 @@
 
         // 게임 시작 시 카드 나누기
         function dealCards() {
-            // 딜러 카드: 첫 카드는 오픈, 나머지는 뒷면
+            dealerCards = [];
+            playerCards = [];
             dealerCards.push(decks.pop());
             dealerCards.push(decks.pop());
             document.getElementById("dealer-cards").innerHTML = `
@@ -107,10 +142,11 @@
                 <img class="card" src="${cardBack}" alt="dealer card back">
             `;
 
-            // 플레이어 카드 2장
             playerCards.push(decks.pop());
             playerCards.push(decks.pop());
             updatePlayerCards();
+            updatePlayerMoney();
+            checkForBlackjack();
         }
 
         // 플레이어 카드 화면에 표시
@@ -122,32 +158,145 @@
             });
         }
 
+        function updateDealerCards() {
+            const dealerCardsDiv = document.getElementById("dealer-cards");
+            dealerCardsDiv.innerHTML = "";
+            dealerCards.forEach(card => {
+                dealerCardsDiv.innerHTML += `<img class="card" src="${card.img}" alt="dealer card">`;
+            });
+        }
+
+        function updatePlayerMoney() {
+            document.getElementById('player-money').textContent = playerMoney;
+        }
+
         // Hit 버튼: 카드를 한 장 받는 로직
         function hit() {
-            if (playerCards.length < 5) { // 플레이어는 최대 5장의 카드를 받을 수 있다.
-                playerCards.push(decks.pop());
-                updatePlayerCards();
+            playerCards.push(decks.pop());
+            updatePlayerCards();
+
+            if (calculateHandValue(playerCards) >= 21) {
+                stay();
             }
-            document.getElementById('hit-btn').disabled = true; // 한번 카드를 받으면 Hit는 비활성화
         }
 
-        // Stay 버튼: 그대로 유지
+        // Stay 버튼: 딜러의 로직 시작
         function stay() {
-            // 딜러는 규칙에 따라 카드를 더 받거나 게임을 종료한다.
-            // 추가 로직 필요
-            alert('플레이어가 Stay를 선택했습니다.');
+            revealDealerCard();
+            setTimeout(dealerTurn, 1000);
         }
 
-        // Double Down 버튼: 베팅금액을 2배로 증가
+        // Double Down 버튼
         function doubleDown() {
-            alert('Double Down! 베팅 금액이 2배로 증가합니다.');
-            // 추가 베팅 로직 필요
+            betAmount *= 2;
+            playerCards.push(decks.pop());
+            updatePlayerCards();
+            setTimeout(dealerTurn, 1000);
         }
 
-        // Surrender 버튼: 항복하고 베팅 금액의 절반을 돌려받음
+        // Surrender 버튼
         function surrender() {
+            playerMoney += betAmount / 2;
             alert('Surrender! 베팅 금액의 절반을 돌려받습니다.');
-            // 항복 로직 추가 필요
+            updatePlayerMoney();
+            dealCards();
+        }
+
+        // 딜러의 두 번째 카드 공개
+        function revealDealerCard() {
+            updateDealerCards();
+        }
+
+        // 딜러의 규칙에 따른 카드 받기
+        function dealerTurn() {
+            let dealerValue = calculateHandValue(dealerCards);
+
+            function drawDealerCard() {
+                if (dealerValue < 17) {
+                    dealerCards.push(decks.pop());
+                    updateDealerCards();
+                    dealerValue = calculateHandValue(dealerCards);
+                    setTimeout(drawDealerCard, 1000); // 다음 카드를 받을 때까지 1초 딜레이
+                } else {
+                    determineWinner();
+                }
+            }
+
+            drawDealerCard();
+        }
+
+        // 손 패의 총합 계산
+        function calculateHandValue(cards) {
+            let value = 0;
+            let aceCount = 0;
+
+            cards.forEach(card => {
+                if (card.value === 'A') {
+                    aceCount++;
+                    value += 11;
+                } else if (['J', 'Q', 'K'].includes(card.value)) {
+                    value += 10;
+                } else {
+                    value += parseInt(card.value);
+                }
+            });
+
+            while (value > 21 && aceCount > 0) {
+                value -= 10;
+                aceCount--;
+            }
+
+            return value;
+        }
+
+        // 블랙잭 체크
+        function checkForBlackjack() {
+            const playerValue = calculateHandValue(playerCards);
+            const dealerValue = calculateHandValue(dealerCards);
+
+            if (playerValue === 21 && dealerValue === 21) {
+                revealDealerCard();
+                alert("Both have blackjack! It's a tie.");
+                dealCards();
+            } else if (playerValue === 21) {
+                alert("Player has blackjack! Player wins!");
+                playerMoney += betAmount * 1.5;
+                updatePlayerMoney();
+                dealCards();
+            } else if (dealerValue === 21) {
+                revealDealerCard();
+                alert("Dealer has blackjack! Dealer wins.");
+                playerMoney -= betAmount;
+                updatePlayerMoney();
+                dealCards();
+            }
+        }
+
+        // 승패 결정 및 결과 팝업
+        function determineWinner() {
+            const playerValue = calculateHandValue(playerCards);
+            const dealerValue = calculateHandValue(dealerCards);
+            let resultMessage = '';
+
+            if (playerValue > 21) {
+                playerMoney -= betAmount;
+                resultMessage = 'Player busts! Dealer wins.';
+            } else if (dealerValue > 21) {
+                playerMoney += betAmount;
+                resultMessage = 'Dealer busts! Player wins.';
+            } else if (playerValue > dealerValue) {
+                playerMoney += betAmount;
+                resultMessage = 'Player wins!';
+            } else if (playerValue < dealerValue) {
+                playerMoney -= betAmount;
+                resultMessage = 'Dealer wins!';
+            } else {
+                resultMessage = "It's a tie!";
+            }
+
+            updatePlayerMoney();
+            alert(resultMessage);
+            dealCards();
         }
 
         // 페이지 로드 시 게임 시작
