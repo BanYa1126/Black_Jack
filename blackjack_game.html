@@ -17,7 +17,6 @@
             justify-content: center;
             height: 100vh;
             position: relative;
-            /* Position the entire page */
         }
 
         h1 {
@@ -65,29 +64,34 @@
             margin: 5px;
         }
 
-        .coin {
-            width: 50px;
-            cursor: pointer;
-            margin-left: -10px;
-        }
-
         #bet-display {
             position: absolute;
             bottom: 300px;
-            /* 위치 조정 */
             font-size: 20px;
             text-align: center;
             width: 100%;
-            /* 중앙 정렬 */
         }
 
         #result-text {
             position: absolute;
             top: 400px;
-            /* 텍스트를 더 중앙으로 이동 */
             font-size: 24px;
             text-align: center;
             width: 100%;
+        }
+
+        #coin-container {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: row; /* 코인을 일자로 배치 */
+            gap: 10px; /* 코인 간격 */
+        }
+
+        .coin {
+            width: 50px;
+            cursor: pointer;
         }
 
         button {
@@ -127,6 +131,19 @@
         <button id="stay-btn" onclick="stay()">Stay</button>
         <button id="double-btn" onclick="doubleDown()">Double Down</button>
         <button id="surrender-btn" onclick="surrender()">Surrender</button>
+    </div>
+
+    <!-- 코인 배치 영역 (일자로 배치) -->
+    <div id="coin-container">
+        <img src="coins/1.png" alt="1 Coin" class="coin" onclick="placeBet(1)">
+        <img src="coins/5.png" alt="5 Coin" class="coin" onclick="placeBet(5)">
+        <img src="coins/10.png" alt="10 Coin" class="coin" onclick="placeBet(10)">
+        <img src="coins/50.png" alt="50 Coin" class="coin" onclick="placeBet(50)">
+        <img src="coins/100.png" alt="100 Coin" class="coin" onclick="placeBet(100)">
+        <img src="coins/500.png" alt="500 Coin" class="coin" onclick="placeBet(500)">
+        <img src="coins/1000.png" alt="1000 Coin" class="coin" onclick="placeBet(1000)">
+        <img src="coins/5000.png" alt="5000 Coin" class="coin" onclick="placeBet(5000)">
+        <img src="coins/10000.png" alt="10000 Coin" class="coin" onclick="placeBet(10000)">
     </div>
 
     <script>
