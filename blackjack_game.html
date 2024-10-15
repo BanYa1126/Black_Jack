@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,6 +63,26 @@
             margin: 5px;
         }
 
+        .coin {
+            width: 50px;
+            cursor: pointer;
+            margin-left: -10px;
+        }
+
+        #bet-display {
+            position: absolute;
+            top: 200px;
+            font-size: 20px;
+        }
+
+        #result-text {
+            position: absolute;
+            top: 10px;
+            font-size: 24px;
+            text-align: center;
+            width: 100%;
+        }
+
         button {
             padding: 10px 20px;
             background-color: #3498db;
@@ -77,9 +98,10 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Blackjack Game</h1>
-    
+
     <div id="dealer">
         <h2>Dealer</h2>
         <div id="dealer-cards"></div>
@@ -90,6 +112,9 @@
         <div id="player-cards"></div>
     </div>
 
+    <div id="bet-display">Current Bet: $<span id="current-bet">0</span></div>
+    <div id="result-text"></div>
+
     <div id="controls">
         <button id="hit-btn" onclick="hit()">Hit</button>
         <button id="stay-btn" onclick="stay()">Stay</button>
@@ -98,36 +123,103 @@
     </div>
 
     <script>
-        const cardBack = "cards/Back_Side.png";
+        const cardBacks = [
+            "Back/Back_Side0.png",
+            "Back/Back_Side1.png",
+            "Back/Back_Side2.png",
+            "Back/Back_Side3.png",
+            "Back/Back_Side4.png",
+            "Back/Back_Side5.png",
+            "Back/Back_Side6.png",
+            "Back/Back_Side7.png"
+        ];
+        let cardBack;
         let dealerCards = [];
         let playerCards = [];
         let playerMoney = Math.floor(Math.random() * 9000) + 1000;
-        let betAmount = 100;
+        let betAmount = 0;
         let decks = [];
+        let gameCount = 0;  // 현재까지 몇 번의 게임이 진행되었는지 추적
+        let currentDeckIndex = 0;  // 현재 덱의 인덱스
+        let currentDeck = [];  // 현재 사용할 덱
 
-        // 카드 덱 생성: 4 ~ 8 덱 중 하나 선택하여 생성
+        // 카드 덱 생성 및 섞기
         function createDecks() {
             const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
             const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-            const numberOfDecks = Math.floor(Math.random() * 5) + 4;
+            const numberOfDecks = Math.floor(Math.random() * 5) + 4;  // 4~8개의 덱 생성
             decks = [];
 
+            // 각 덱 생성
             for (let i = 0; i < numberOfDecks; i++) {
+                const deck = [];
                 for (let suit of suits) {
                     for (let value of values) {
-                        decks.push({ value, suit, img: `cards/${value}_of_${suit}.png` });
+                        deck.push({ value, suit, img: `cards/${value}_of_${suit}.png` });
                     }
                 }
+                decks.push(deck);  // 덱 배열에 각 덱 추가
             }
 
             shuffleDecks();
+            setCurrentDeck();  // 처음 사용할 덱 설정
         }
 
         // 카드 덱 섞기
         function shuffleDecks() {
-            for (let i = decks.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [decks[i], decks[j]] = [decks[j], decks[i]];
+            decks.forEach(deck => {
+                for (let i = deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [deck[i], deck[j]] = [deck[j], deck[i]];
+                }
+            });
+        }
+
+        // 현재 덱 설정 및 덱 변경
+        function setCurrentDeck() {
+            if (currentDeckIndex >= decks.length) {
+                currentDeckIndex = 0;  // 모든 덱을 다 사용했으면 다시 첫 번째 덱으로
+            }
+
+            currentDeck = decks[currentDeckIndex];  // 현재 사용할 덱 설정
+            cardBack = cardBacks[currentDeckIndex % cardBacks.length];  // 덱의 카드 뒷면 설정
+            gameCount = 0;  // 게임 횟수 초기화
+        }
+
+        // 게임이 끝날 때 덱 변경 로직 실행
+        function endGame() {
+            gameCount++;  // 게임 진행 횟수 증가
+            if (gameCount >= 5) {  // 5번의 게임이 끝나면 덱을 변경
+                currentDeckIndex++;  // 다음 덱으로 이동
+                setCurrentDeck();  // 새로운 덱 설정
+            }
+        }
+
+        // 카드 한 장을 뽑는 로직 (게임 중 사용)
+        function drawCard() {
+            if (currentDeck.length === 0) {  // 덱에 카드가 없으면 다음 덱으로
+                currentDeckIndex++;
+                setCurrentDeck();
+            }
+            const card = currentDeck.pop();  // 현재 덱에서 카드 뽑기
+            return card;
+        }
+
+        // 게임이 종료되었을 때 실행될 함수 (딜러와 플레이어 모두의 승패 결정 후 호출)
+        function gameResult() {
+            // 게임 결과 로직 처리
+            endGame();  // 게임 종료 후 덱 변경 체크
+        }
+
+        // 베팅 금액 설정
+        function placeBet(amount) {
+            if (playerMoney >= amount) {
+                betAmount += amount;
+                playerMoney -= amount;
+                updatePlayerMoney();
+                document.getElementById('current-bet').textContent = betAmount;
+            } else {
+                alert('Not enough money to place this bet!');
             }
         }
 
@@ -135,17 +227,16 @@
         function dealCards() {
             dealerCards = [];
             playerCards = [];
-            dealerCards.push(decks.pop());
-            dealerCards.push(decks.pop());
+            dealerCards.push(drawCard());
+            dealerCards.push(drawCard());
             document.getElementById("dealer-cards").innerHTML = `
                 <img class="card" src="${dealerCards[0].img}" alt="dealer card">
                 <img class="card" src="${cardBack}" alt="dealer card back">
             `;
 
-            playerCards.push(decks.pop());
-            playerCards.push(decks.pop());
+            playerCards.push(drawCard());
+            playerCards.push(drawCard());
             updatePlayerCards();
-            updatePlayerMoney();
             checkForBlackjack();
         }
 
@@ -170,9 +261,14 @@
             document.getElementById('player-money').textContent = playerMoney;
         }
 
+        // 게임 결과를 화면에 표시
+        function displayResult(result) {
+            document.getElementById('result-text').textContent = result;
+        }
+
         // Hit 버튼: 카드를 한 장 받는 로직
         function hit() {
-            playerCards.push(decks.pop());
+            playerCards.push(drawCard());
             updatePlayerCards();
 
             if (calculateHandValue(playerCards) >= 21) {
@@ -189,7 +285,7 @@
         // Double Down 버튼
         function doubleDown() {
             betAmount *= 2;
-            playerCards.push(decks.pop());
+            playerCards.push(drawCard());
             updatePlayerCards();
             setTimeout(dealerTurn, 1000);
         }
@@ -197,7 +293,7 @@
         // Surrender 버튼
         function surrender() {
             playerMoney += betAmount / 2;
-            alert('Surrender! 베팅 금액의 절반을 돌려받습니다.');
+            displayResult('Surrender! 베팅 금액의 절반을 돌려받습니다.');
             updatePlayerMoney();
             dealCards();
         }
@@ -213,7 +309,7 @@
 
             function drawDealerCard() {
                 if (dealerValue < 17) {
-                    dealerCards.push(decks.pop());
+                    dealerCards.push(drawCard());
                     updateDealerCards();
                     dealerValue = calculateHandValue(dealerCards);
                     setTimeout(drawDealerCard, 1000); // 다음 카드를 받을 때까지 1초 딜레이
@@ -256,23 +352,23 @@
 
             if (playerValue === 21 && dealerValue === 21) {
                 revealDealerCard();
-                alert("Both have blackjack! It's a tie.");
+                displayResult("Both have blackjack! It's a tie.");
                 dealCards();
             } else if (playerValue === 21) {
-                alert("Player has blackjack! Player wins!");
+                displayResult("Player has blackjack! Player wins!");
                 playerMoney += betAmount * 1.5;
                 updatePlayerMoney();
                 dealCards();
             } else if (dealerValue === 21) {
                 revealDealerCard();
-                alert("Dealer has blackjack! Dealer wins.");
+                displayResult("Dealer has blackjack! Dealer wins.");
                 playerMoney -= betAmount;
                 updatePlayerMoney();
                 dealCards();
             }
         }
 
-        // 승패 결정 및 결과 팝업
+        // 승패 결정 및 결과 표시
         function determineWinner() {
             const playerValue = calculateHandValue(playerCards);
             const dealerValue = calculateHandValue(dealerCards);
@@ -295,15 +391,17 @@
             }
 
             updatePlayerMoney();
-            alert(resultMessage);
-            dealCards();
+            displayResult(resultMessage);
+            gameResult();  // 게임 결과 후에 게임 종료 처리
+            dealCards();  // 새로운 게임 시작
         }
 
         // 페이지 로드 시 게임 시작
-        window.onload = function() {
+        window.onload = function () {
             createDecks();
             dealCards();
         }
     </script>
 </body>
+
 </html>
