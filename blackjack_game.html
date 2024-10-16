@@ -171,6 +171,7 @@
         let gameCount = 0;
         let currentDeckIndex = 0;
         let currentDeck = [];
+        const coinValues = [10000, 5000, 1000, 500, 100, 50, 10, 5, 1];
 
         // 코인 배치 함수
         function updateCoinDisplay() {
@@ -178,7 +179,6 @@
             coinContainer.innerHTML = '';
 
             // 플레이어 돈에 따라 코인 표시
-            const coinValues = [10000, 5000, 1000, 500, 100, 50, 10, 5, 1];
             let remainingMoney = playerMoney;
 
             coinValues.forEach(value => {
@@ -360,10 +360,6 @@
             if (calculateHandValue(playerCards) >= 21) {
                 stay();
             }
-
-            // 플레이어의 금액과 코인 상태 업데이트
-            updatePlayerMoney();
-            updateCoinDisplay();
         }
 
         // Stay 버튼: 딜러의 로직 시작
@@ -371,32 +367,38 @@
             revealDealerCard();
             setTimeout(dealerTurn, 1000);
 
-            // 플레이어의 금액과 코인 상태 업데이트
+            // Stay 이후 플레이어의 금액과 코인 상태 업데이트
             updatePlayerMoney();
-            updateCoinDisplay();
+            updateCoinDisplay(); // 즉시 코인 상태 업데이트
         }
 
         // Double Down 버튼
         function doubleDown() {
-            betAmount *= 2;
-            playerCards.push(drawCard());
-            updatePlayerCards();
-            setTimeout(dealerTurn, 1000);
+            if (playerMoney >= betAmount) {
+                playerMoney -= betAmount; // 플레이어가 더블 다운한 금액 차감
+                betAmount *= 2;
+                playerCards.push(drawCard());
+                updatePlayerCards();
+                setTimeout(dealerTurn, 1000);
 
-            // 플레이어의 금액과 코인 상태 업데이트
-            updatePlayerMoney();
-            updateCoinDisplay();
+                // Double Down 이후 플레이어의 금액과 코인 상태 업데이트
+                updatePlayerMoney();
+                updateCoinDisplay(); // 즉시 코인 상태 업데이트
+            } else {
+                alert('Not enough money to double down!');
+            }
         }
 
         // Surrender 버튼
         function surrender() {
-            playerMoney += betAmount / 2;
+            playerMoney += betAmount / 2; // 베팅 금액의 절반을 플레이어에게 반환
+            betAmount = 0; // 베팅 금액 초기화
             displayResult('Surrender! 베팅 금액의 절반을 돌려받습니다.');
-            dealCards();
-            // 플레이어의 금액과 코인 상태 업데이트
             updatePlayerMoney();
-            updateCoinDisplay();
+            updateCoinDisplay(); // 즉시 코인 상태 업데이트
+            dealCards(); // 새로운 카드 배분으로 게임 재시작
         }
+
 
         // 딜러의 두 번째 카드 공개
         function revealDealerCard() {
