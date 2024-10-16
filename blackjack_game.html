@@ -85,16 +85,9 @@
             left: 20px;
             bottom: 80px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            /* 코인을 가로로 배치 */
             gap: 10px;
-        }
-
-        .coin-stack {
-            display: flex;
-            flex-direction: column-reverse;
-            /* 아래쪽에서 위쪽으로 쌓이도록 설정 */
-            align-items: center;
-            gap: 2px;
         }
 
         .coin {
@@ -151,6 +144,8 @@
     <div id="coin-container"></div>
     <button id="reset-bet-btn" onclick="resetBet()">Reset Bet</button>
 
+    <button id="restart-btn" style="display: none;" onclick="restartGame()">Restart Game</button>
+
     <script>
         const cardBacks = [
             "Back/Back_Side0.png",
@@ -171,7 +166,7 @@
         let gameCount = 0;
         let currentDeckIndex = 0;
         let currentDeck = [];
-        const coinValues = [10000, 5000, 1000, 500, 100, 50, 10, 5, 1];
+        const coinValues = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
 
         // 코인 배치 함수
         function updateCoinDisplay() {
@@ -181,7 +176,8 @@
             // 플레이어 돈에 따라 코인 표시
             let remainingMoney = playerMoney;
 
-            coinValues.forEach(value => {
+            // 큰 단위의 코인부터 순서대로 사용
+            coinValues.slice().reverse().forEach(value => {
                 const count = Math.floor(remainingMoney / value);
                 if (count > 0) {
                     const coinStack = document.createElement('div');
@@ -198,31 +194,33 @@
                     }
 
                     coinContainer.appendChild(coinStack);
-                    remainingMoney -= count * value;
+                    remainingMoney -= count * value; // 남은 금액 계산
                 }
             });
         }
 
         function resetBet() {
-            playerMoney += betAmount; // 베팅한 금액을 플레이어에게 반환
-            betAmount = 0; // 베팅 금액 초기화
-            initializeCoinCounts(); // 코인의 개수를 초기 상태로 복원
-            updatePlayerMoney(); // 플레이어 금액 업데이트
-            document.getElementById('current-bet').textContent = betAmount; // 화면에 베팅 금액 0으로 표시
-            updateCoinDisplay(); // 코인 이미지 업데이트
+            playerMoney += betAmount;
+            betAmount = 0;
+            updatePlayerMoney();
+            document.getElementById('current-bet').textContent = betAmount;
+            updateCoinDisplay();
         }
 
         function updatePlayerMoney() {
             document.getElementById('player-money').textContent = playerMoney;
-            updateCoinDisplay(); // 코인 업데이트
+            updateCoinDisplay(); // 플레이어의 금액이 변경되면 코인도 업데이트
         }
 
         function placeBet(amount) {
             if (playerMoney >= amount) {
                 betAmount += amount;
                 playerMoney -= amount;
-                updateCoinDisplay();
-                updateCoinDisplay();
+
+                // 베팅 후 플레이어의 잔액 및 코인 상태 업데이트
+                updatePlayerMoney();
+                updateCoinDisplay(); // 코인 수를 다시 업데이트하여 표시
+
                 document.getElementById('current-bet').textContent = betAmount;
             } else {
                 alert('Not enough money to place this bet!');
@@ -343,13 +341,33 @@
             });
         }
 
+        function displayResult(result) {
+            document.getElementById('result-text').textContent = result;
+        }
+
         function updatePlayerMoney() {
             document.getElementById('player-money').textContent = playerMoney;
         }
 
-        // 게임 결과를 화면에 표시
-        function displayResult(result) {
-            document.getElementById('result-text').textContent = result;
+        function showRestartButton() {
+            const restartBtn = document.getElementById('restart-btn');
+            restartBtn.style.display = 'block'; // 버튼을 화면에 표시
+        }
+
+        // 게임 재시작 함수
+        function restartGame() {
+            playerMoney = Math.floor(Math.random() * 9000) + 1000; // 플레이어의 초기 금액 재설정
+            betAmount = 0;
+            document.getElementById('current-bet').textContent = betAmount;
+            document.getElementById('result-text').textContent = '';
+            document.getElementById('player-money').textContent = playerMoney;
+            updateCoinDisplay(); // 초기 코인 상태로 업데이트
+            createDecks(); // 새로운 카드 덱 생성 및 섞기
+            dealCards(); // 새로운 카드 배분으로 게임 재시작
+
+            // 게임 재시작 버튼 숨기기
+            const restartBtn = document.getElementById('restart-btn');
+            restartBtn.style.display = 'none';
         }
 
         // Hit 버튼: 카드를 한 장 받는 로직
@@ -357,8 +375,12 @@
             playerCards.push(drawCard());
             updatePlayerCards();
 
+            // Hit 버튼을 누르면 Double Down과 Surrender 비활성화
+            document.getElementById('double-btn').disabled = true;
+            document.getElementById('surrender-btn').disabled = true;
+
             if (calculateHandValue(playerCards) >= 21) {
-                stay();
+                stay(); // 21 이상이면 자동으로 Stay 처리
             }
         }
 
@@ -374,16 +396,24 @@
 
         // Double Down 버튼
         function doubleDown() {
-            if (playerMoney >= betAmount) {
-                playerMoney -= betAmount; // 플레이어가 더블 다운한 금액 차감
-                betAmount += betAmount;
+            const additionalBet = betAmount; // 현재 베팅 금액 저장
+
+            // 추가 베팅을 위한 잔액 확인
+            if (playerMoney >= additionalBet) {
+                playerMoney -= additionalBet; // 추가 베팅 금액만큼 차감
+                betAmount *= 2; // 기존 베팅 금액을 두 배로 설정
                 playerCards.push(drawCard());
                 updatePlayerCards();
+
+                // Double Down 이후 Stay 처리
                 setTimeout(dealerTurn, 1000);
 
                 // Double Down 이후 플레이어의 금액과 코인 상태 업데이트
                 updatePlayerMoney();
                 updateCoinDisplay(); // 즉시 코인 상태 업데이트
+            } else {
+                // 잔액이 부족할 경우 경고 메시지 표시
+                alert('Not enough money to double down!');
             }
         }
 
@@ -396,7 +426,6 @@
             updateCoinDisplay(); // 즉시 코인 상태 업데이트
             dealCards(); // 새로운 카드 배분으로 게임 재시작
         }
-
 
         // 딜러의 두 번째 카드 공개
         function revealDealerCard() {
@@ -450,19 +479,24 @@
             const playerValue = calculateHandValue(playerCards);
             const dealerValue = calculateHandValue(dealerCards);
 
-            if (playerValue === 21 && dealerValue === 21) {
+            // 플레이어와 딜러 모두 처음 2장의 카드로 21일 때
+            if (playerValue === 21 && dealerValue === 21 && playerCards.length === 2 && dealerCards.length === 2) {
                 revealDealerCard();
                 displayResult("Both have blackjack! It's a tie.");
                 dealCards();
-            } else if (playerValue === 21) {
-                displayResult("Player has blackjack! Player wins!");
-                playerMoney += betAmount * 2.5;
+            }
+            // 플레이어가 블랙잭일 때 (처음 2장의 합이 21)
+            else if (playerValue === 21 && playerCards.length === 2) {
+                displayResult("Player has BlackJack! Player wins!");
+                playerMoney += betAmount * 2.5; // 블랙잭 승리 보상 (1.5배)
                 updatePlayerMoney();
                 dealCards();
-            } else if (dealerValue === 21) {
+            }
+            // 딜러가 블랙잭일 때 (처음 2장의 합이 21)
+            else if (dealerValue === 21 && dealerCards.length === 2) {
                 revealDealerCard();
-                displayResult("Dealer has blackjack! Dealer wins.");
-                playerMoney -= 1.5 * betAmount;
+                displayResult("Dealer has BlackJack! Dealer wins.");
+                playerMoney -= betAmount * 1.5; // 플레이어는 베팅 금액만큼 잃음
                 updatePlayerMoney();
                 dealCards();
             }
@@ -475,25 +509,41 @@
             let resultMessage = '';
 
             if (playerValue > 21) {
-                playerMoney -= betAmount;
+                // 플레이어가 패배 (버스트)
                 resultMessage = 'Player busts! Dealer wins.';
             } else if (dealerValue > 21) {
-                playerMoney += 2 * betAmount;
+                // 딜러가 패배 (버스트)
+                playerMoney += betAmount * 2; // 플레이어가 베팅 금액의 두 배 획득
                 resultMessage = 'Dealer busts! Player wins.';
             } else if (playerValue > dealerValue) {
-                playerMoney += 2 * betAmount;
+                // 플레이어가 승리
+                playerMoney += betAmount * 2; // 플레이어가 베팅 금액의 두 배 획득
                 resultMessage = 'Player wins!';
             } else if (playerValue < dealerValue) {
-                playerMoney -= betAmount;
+                // 딜러가 승리
                 resultMessage = 'Dealer wins!';
             } else {
+                // 무승부
+                playerMoney += betAmount; // 베팅 금액을 반환 (비긴 경우)
                 resultMessage = "It's a tie!";
             }
 
+            betAmount = 0; // 베팅 금액 초기화
             updatePlayerMoney();
+            updateCoinDisplay();
             displayResult(resultMessage);
-            gameResult();  // 게임 결과 후에 게임 종료 처리
-            dealCards();  // 새로운 게임 시작
+            gameResult(); // 게임 종료 후 처리
+            dealCards(); // 새로운 게임 시작
+
+            // 플레이어의 금액이 0이 되었는지 확인하여 처리
+            if (playerMoney === 0) {
+                displayResult('플레이어의 금액이 탕진되었습니다.');
+                showRestartButton();
+            }
+
+            // 버튼 재활성화
+            document.getElementById('double-btn').disabled = false;
+            document.getElementById('surrender-btn').disabled = false;
         }
 
         // 페이지 로드 시 게임 시작
