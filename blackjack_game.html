@@ -83,15 +83,29 @@
         #coin-container {
             position: absolute;
             left: 20px;
-            bottom: 20px;
+            bottom: 80px;
             display: flex;
-            flex-direction: row; /* 코인을 일자로 배치 */
-            gap: 10px; /* 코인 간격 */
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .coin-stack {
+            display: flex;
+            flex-direction: column-reverse;
+            /* 아래쪽에서 위쪽으로 쌓이도록 설정 */
+            align-items: center;
+            gap: 2px;
         }
 
         .coin {
             width: 50px;
             cursor: pointer;
+        }
+
+        #reset-bet-btn {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
         }
 
         button {
@@ -131,21 +145,11 @@
         <button id="stay-btn" onclick="stay()">Stay</button>
         <button id="double-btn" onclick="doubleDown()">Double Down</button>
         <button id="surrender-btn" onclick="surrender()">Surrender</button>
-        <button id="reset-bet-btn" onclick="resetBet()">Reset Bet</button>
     </div>
 
-    <!-- 코인 배치 영역 (일자로 배치) -->
-    <div id="coin-container">
-        <img src="coins/1.png" alt="1 Coin" class="coin" onclick="placeBet(1)">
-        <img src="coins/5.png" alt="5 Coin" class="coin" onclick="placeBet(5)">
-        <img src="coins/10.png" alt="10 Coin" class="coin" onclick="placeBet(10)">
-        <img src="coins/50.png" alt="50 Coin" class="coin" onclick="placeBet(50)">
-        <img src="coins/100.png" alt="100 Coin" class="coin" onclick="placeBet(100)">
-        <img src="coins/500.png" alt="500 Coin" class="coin" onclick="placeBet(500)">
-        <img src="coins/1000.png" alt="1000 Coin" class="coin" onclick="placeBet(1000)">
-        <img src="coins/5000.png" alt="5000 Coin" class="coin" onclick="placeBet(5000)">
-        <img src="coins/10000.png" alt="10000 Coin" class="coin" onclick="placeBet(10000)">
-    </div>
+    <!-- 코인 배치 영역 -->
+    <div id="coin-container"></div>
+    <button id="reset-bet-btn" onclick="resetBet()">Reset Bet</button>
 
     <script>
         const cardBacks = [
@@ -164,9 +168,76 @@
         let playerMoney = Math.floor(Math.random() * 9000) + 1000;
         let betAmount = 0;
         let decks = [];
-        let gameCount = 0;  // 현재까지 몇 번의 게임이 진행되었는지 추적
-        let currentDeckIndex = 0;  // 현재 덱의 인덱스
-        let currentDeck = [];  // 현재 사용할 덱
+        let gameCount = 0;
+        let currentDeckIndex = 0;
+        let currentDeck = [];
+
+        // 코인 배치 함수
+        function updateCoinDisplay() {
+            const coinContainer = document.getElementById('coin-container');
+            coinContainer.innerHTML = '';
+
+            // 플레이어 돈에 따라 코인 표시
+            const coinValues = [10000, 5000, 1000, 500, 100, 50, 10, 5, 1];
+            let remainingMoney = playerMoney;
+
+            coinValues.forEach(value => {
+                const count = Math.floor(remainingMoney / value);
+                if (count > 0) {
+                    const coinStack = document.createElement('div');
+                    coinStack.classList.add('coin-stack');
+
+                    // 해당 코인 수만큼 이미지 추가
+                    for (let i = 0; i < count; i++) {
+                        const coin = document.createElement('img');
+                        coin.src = `coins/${value}.png`;
+                        coin.alt = `${value} Coin`;
+                        coin.classList.add('coin');
+                        coin.onclick = () => placeBet(value);
+                        coinStack.appendChild(coin);
+                    }
+
+                    coinContainer.appendChild(coinStack);
+                    remainingMoney -= count * value;
+                }
+            });
+        }
+
+        function resetBet() {
+            playerMoney += betAmount; // 베팅한 금액을 플레이어에게 반환
+            betAmount = 0; // 베팅 금액 초기화
+            initializeCoinCounts(); // 코인의 개수를 초기 상태로 복원
+            updatePlayerMoney(); // 플레이어 금액 업데이트
+            document.getElementById('current-bet').textContent = betAmount; // 화면에 베팅 금액 0으로 표시
+            updateCoinDisplay(); // 코인 이미지 업데이트
+        }
+
+        function updatePlayerMoney() {
+            document.getElementById('player-money').textContent = playerMoney;
+            updateCoinDisplay(); // 코인 업데이트
+        }
+
+        function placeBet(amount) {
+            if (playerMoney >= amount) {
+                betAmount += amount;
+                playerMoney -= amount;
+                updateCoinDisplay();
+                updateCoinDisplay();
+                document.getElementById('current-bet').textContent = betAmount;
+            } else {
+                alert('Not enough money to place this bet!');
+            }
+        }
+
+        function initializeCoinCounts() {
+            coinCounts = {};
+            let remainingMoney = playerMoney;
+            coinValues.forEach(value => {
+                coinCounts[value] = Math.floor(remainingMoney / value);
+                remainingMoney %= value;
+            });
+            updateCoinDisplay();
+        }
 
         // 카드 덱 생성 및 섞기
         function createDecks() {
@@ -220,13 +291,6 @@
             }
         }
 
-        function resetBet() {
-            playerMoney += betAmount; // 플레이어에게 베팅 금액을 돌려줌
-            betAmount = 0; // 베팅 금액 초기화
-            updatePlayerMoney();
-            document.getElementById('current-bet').textContent = betAmount;
-        }
-
         // 카드 한 장을 뽑는 로직 (게임 중 사용)
         function drawCard() {
             if (currentDeck.length === 0) {  // 덱에 카드가 없으면 다음 덱으로
@@ -241,20 +305,8 @@
         function gameResult() {
             // 게임 결과 로직 처리
             endGame();  // 게임 종료 후 덱 변경 체크
-            betAmount = 0 
+            betAmount = 0
             document.getElementById('current-bet').textContent = betAmount;
-        }
-
-        // 베팅 금액 설정
-        function placeBet(amount) {
-            if (playerMoney >= amount) {
-                betAmount += amount;
-                playerMoney -= amount;
-                updatePlayerMoney();
-                document.getElementById('current-bet').textContent = betAmount;
-            } else {
-                alert('Not enough money to place this bet!');
-            }
         }
 
         // 게임 시작 시 카드 나누기
@@ -308,12 +360,20 @@
             if (calculateHandValue(playerCards) >= 21) {
                 stay();
             }
+
+            // 플레이어의 금액과 코인 상태 업데이트
+            updatePlayerMoney();
+            updateCoinDisplay();
         }
 
         // Stay 버튼: 딜러의 로직 시작
         function stay() {
             revealDealerCard();
             setTimeout(dealerTurn, 1000);
+
+            // 플레이어의 금액과 코인 상태 업데이트
+            updatePlayerMoney();
+            updateCoinDisplay();
         }
 
         // Double Down 버튼
@@ -322,14 +382,20 @@
             playerCards.push(drawCard());
             updatePlayerCards();
             setTimeout(dealerTurn, 1000);
+
+            // 플레이어의 금액과 코인 상태 업데이트
+            updatePlayerMoney();
+            updateCoinDisplay();
         }
 
         // Surrender 버튼
         function surrender() {
-            playerMoney -= betAmount / 2;
+            playerMoney += betAmount / 2;
             displayResult('Surrender! 베팅 금액의 절반을 돌려받습니다.');
-            updatePlayerMoney();
             dealCards();
+            // 플레이어의 금액과 코인 상태 업데이트
+            updatePlayerMoney();
+            updateCoinDisplay();
         }
 
         // 딜러의 두 번째 카드 공개
@@ -434,6 +500,7 @@
         window.onload = function () {
             createDecks();
             dealCards();
+            updateCoinDisplay();
         }
     </script>
 </body>
