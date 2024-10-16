@@ -131,6 +131,7 @@
         <button id="stay-btn" onclick="stay()">Stay</button>
         <button id="double-btn" onclick="doubleDown()">Double Down</button>
         <button id="surrender-btn" onclick="surrender()">Surrender</button>
+        <button id="reset-bet-btn" onclick="resetBet()">Reset Bet</button>
     </div>
 
     <!-- 코인 배치 영역 (일자로 배치) -->
@@ -219,6 +220,13 @@
             }
         }
 
+        function resetBet() {
+            playerMoney += betAmount; // 플레이어에게 베팅 금액을 돌려줌
+            betAmount = 0; // 베팅 금액 초기화
+            updatePlayerMoney();
+            document.getElementById('current-bet').textContent = betAmount;
+        }
+
         // 카드 한 장을 뽑는 로직 (게임 중 사용)
         function drawCard() {
             if (currentDeck.length === 0) {  // 덱에 카드가 없으면 다음 덱으로
@@ -233,6 +241,8 @@
         function gameResult() {
             // 게임 결과 로직 처리
             endGame();  // 게임 종료 후 덱 변경 체크
+            betAmount = 0 
+            document.getElementById('current-bet').textContent = betAmount;
         }
 
         // 베팅 금액 설정
