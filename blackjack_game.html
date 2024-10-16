@@ -376,7 +376,7 @@
         function doubleDown() {
             if (playerMoney >= betAmount) {
                 playerMoney -= betAmount; // 플레이어가 더블 다운한 금액 차감
-                betAmount *= 2;
+                betAmount += betAmount;
                 playerCards.push(drawCard());
                 updatePlayerCards();
                 setTimeout(dealerTurn, 1000);
@@ -384,8 +384,6 @@
                 // Double Down 이후 플레이어의 금액과 코인 상태 업데이트
                 updatePlayerMoney();
                 updateCoinDisplay(); // 즉시 코인 상태 업데이트
-            } else {
-                alert('Not enough money to double down!');
             }
         }
 
