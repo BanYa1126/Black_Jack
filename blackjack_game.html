@@ -74,7 +74,7 @@
 
         #result-text {
             position: absolute;
-            top: 400px;
+            top: 350px;
             font-size: 24px;
             text-align: center;
             width: 100%;
@@ -316,7 +316,7 @@
 
         // Surrender 버튼
         function surrender() {
-            playerMoney += betAmount / 2;
+            playerMoney -= betAmount / 2;
             displayResult('Surrender! 베팅 금액의 절반을 돌려받습니다.');
             updatePlayerMoney();
             dealCards();
@@ -380,13 +380,13 @@
                 dealCards();
             } else if (playerValue === 21) {
                 displayResult("Player has blackjack! Player wins!");
-                playerMoney += betAmount * 1.5;
+                playerMoney += betAmount * 2.5;
                 updatePlayerMoney();
                 dealCards();
             } else if (dealerValue === 21) {
                 revealDealerCard();
                 displayResult("Dealer has blackjack! Dealer wins.");
-                playerMoney -= betAmount;
+                playerMoney -= 1.5 * betAmount;
                 updatePlayerMoney();
                 dealCards();
             }
@@ -402,10 +402,10 @@
                 playerMoney -= betAmount;
                 resultMessage = 'Player busts! Dealer wins.';
             } else if (dealerValue > 21) {
-                playerMoney += betAmount;
+                playerMoney += 2 * betAmount;
                 resultMessage = 'Dealer busts! Player wins.';
             } else if (playerValue > dealerValue) {
-                playerMoney += betAmount;
+                playerMoney += 2 * betAmount;
                 resultMessage = 'Player wins!';
             } else if (playerValue < dealerValue) {
                 playerMoney -= betAmount;
