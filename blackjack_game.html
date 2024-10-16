@@ -168,7 +168,6 @@
         let currentDeck = [];
         const coinValues = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
 
-        // 코인 배치 함수
         function updateCoinDisplay() {
             const coinContainer = document.getElementById('coin-container');
             coinContainer.innerHTML = '';
@@ -182,6 +181,17 @@
                 if (count > 0) {
                     const coinStack = document.createElement('div');
                     coinStack.classList.add('coin-stack');
+                    coinStack.style.display = 'flex';
+                    coinStack.style.flexDirection = 'column-reverse'; // 아래에서 위로 쌓이도록 설정
+                    coinStack.style.alignItems = 'center';
+                    coinStack.style.marginRight = '10px'; // 코인들 사이의 간격
+
+                    // 코인 이미지 하나를 추가하여 코인 값을 표시
+                    const coinLabel = document.createElement('div');
+                    coinLabel.textContent = `${value}$`;
+                    coinLabel.style.fontSize = '14px';
+                    coinLabel.style.color = 'white';
+                    coinStack.appendChild(coinLabel);
 
                     // 해당 코인 수만큼 이미지 추가
                     for (let i = 0; i < count; i++) {
