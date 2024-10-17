@@ -167,6 +167,29 @@
         let currentDeckIndex = 0;
         let currentDeck = [];
         const coinValues = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
+        function btnHide() {
+            document.getElementById('hit-btn').style.display = 'none';
+            document.getElementById('stay-btn').style.display = 'none';
+            document.getElementById('double-btn').style.display = 'none';
+            document.getElementById('surrender-btn').style.display = 'none';
+        }
+
+        function showGameButtons() {
+            document.getElementById('hit-btn').style.display = 'inline-block';
+            document.getElementById('stay-btn').style.display = 'inline-block';
+            document.getElementById('double-btn').style.display = 'inline-block';
+            document.getElementById('surrender-btn').style.display = 'inline-block';
+        }
+
+        function hideDoubleAndSurrender() {
+            document.getElementById('double-btn').style.display = 'none';
+            document.getElementById('surrender-btn').style.display = 'none';
+        }
+
+        function showHitAndStay() {
+            document.getElementById('hit-btn').style.display = 'inline-block';
+            document.getElementById('stay-btn').style.display = 'inline-block';
+        }
 
         function updateCoinDisplay() {
             const coinContainer = document.getElementById('coin-container');
@@ -232,6 +255,11 @@
                 updateCoinDisplay(); // 코인 수를 다시 업데이트하여 표시
 
                 document.getElementById('current-bet').textContent = betAmount;
+
+                // 베팅 금액이 0보다 크면 게임 버튼 표시
+                if (betAmount > 0) {
+                    showGameButtons();
+                }
             } else {
                 alert('Not enough money to place this bet!');
             }
@@ -292,6 +320,7 @@
 
         // 게임이 끝날 때 덱 변경 로직 실행
         function endGame() {
+            btnHide();
             gameCount++;  // 게임 진행 횟수 증가
             if (gameCount >= 5) {  // 5번의 게임이 끝나면 덱을 변경
                 currentDeckIndex++;  // 다음 덱으로 이동
@@ -355,10 +384,6 @@
             document.getElementById('result-text').textContent = result;
         }
 
-        function updatePlayerMoney() {
-            document.getElementById('player-money').textContent = playerMoney;
-        }
-
         function showRestartButton() {
             const restartBtn = document.getElementById('restart-btn');
             restartBtn.style.display = 'block'; // 버튼을 화면에 표시
@@ -380,14 +405,12 @@
             restartBtn.style.display = 'none';
         }
 
-        // Hit 버튼: 카드를 한 장 받는 로직
         function hit() {
             playerCards.push(drawCard());
             updatePlayerCards();
 
             // Hit 버튼을 누르면 Double Down과 Surrender 비활성화
-            document.getElementById('double-btn').disabled = true;
-            document.getElementById('surrender-btn').disabled = true;
+            hideDoubleAndSurrender();
 
             if (calculateHandValue(playerCards) >= 21) {
                 stay(); // 21 이상이면 자동으로 Stay 처리
@@ -492,12 +515,12 @@
             // 플레이어와 딜러 모두 처음 2장의 카드로 21일 때
             if (playerValue === 21 && dealerValue === 21 && playerCards.length === 2 && dealerCards.length === 2) {
                 revealDealerCard();
-                displayResult("Both have blackjack! It's a tie.");
+                displayResult("플레이어와 딜러 모두 BlackJack. 비겼습니다.");
                 dealCards();
             }
             // 플레이어가 블랙잭일 때 (처음 2장의 합이 21)
             else if (playerValue === 21 && playerCards.length === 2) {
-                displayResult("Player has BlackJack! Player wins!");
+                displayResult("플레이어의 BlackJack. 플레이어가 이겼습니다.");
                 playerMoney += betAmount * 2.5; // 블랙잭 승리 보상 (1.5배)
                 updatePlayerMoney();
                 dealCards();
@@ -505,7 +528,7 @@
             // 딜러가 블랙잭일 때 (처음 2장의 합이 21)
             else if (dealerValue === 21 && dealerCards.length === 2) {
                 revealDealerCard();
-                displayResult("Dealer has BlackJack! Dealer wins.");
+                displayResult("딜러의 BlackJack. 딜러가 이겼습니다.");
                 playerMoney -= betAmount * 1.5; // 플레이어는 베팅 금액만큼 잃음
                 updatePlayerMoney();
                 dealCards();
@@ -520,22 +543,22 @@
 
             if (playerValue > 21) {
                 // 플레이어가 패배 (버스트)
-                resultMessage = 'Player busts! Dealer wins.';
+                resultMessage = '플레이어의 Busts! 딜러가 이겼습니다.';
             } else if (dealerValue > 21) {
                 // 딜러가 패배 (버스트)
                 playerMoney += betAmount * 2; // 플레이어가 베팅 금액의 두 배 획득
-                resultMessage = 'Dealer busts! Player wins.';
+                resultMessage = '딜러의 Busts! 플레이어가 이겼습니다.';
             } else if (playerValue > dealerValue) {
                 // 플레이어가 승리
                 playerMoney += betAmount * 2; // 플레이어가 베팅 금액의 두 배 획득
-                resultMessage = 'Player wins!';
+                resultMessage = '플레이어가 이겼습니다.';
             } else if (playerValue < dealerValue) {
                 // 딜러가 승리
-                resultMessage = 'Dealer wins!';
+                resultMessage = '딜러가 이겼습니다.';
             } else {
                 // 무승부
                 playerMoney += betAmount; // 베팅 금액을 반환 (비긴 경우)
-                resultMessage = "It's a tie!";
+                resultMessage = "비겼습니다.";
             }
 
             betAmount = 0; // 베팅 금액 초기화
@@ -556,11 +579,12 @@
             document.getElementById('surrender-btn').disabled = false;
         }
 
-        // 페이지 로드 시 게임 시작
         window.onload = function () {
             createDecks();
             dealCards();
             updateCoinDisplay();
+            document.getElementById('player-money').textContent = playerMoney;
+            btnHide();
         }
     </script>
 </body>
