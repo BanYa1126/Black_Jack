@@ -598,9 +598,27 @@
 
         // 코인 환전 처리
         function exchangeCoins() {
+            let Store_Money;
+            const playerCoins = [];
+            for (let i = coinValues.length - 1; i > 0; i--) {
+                const P_coin = coinValues[i];
+                const Next_coin = coinValues[i - 1];
 
-            alert("환전되었습니다."); // 환전 메시지 표시
-            updatePlayerMoney(); // 플레이어의 금액 업데이트
+                playerCoins.push(coinValues[i], Math.floor(playerMoney / coinValues[i]));
+                Store_Money = playerMoney % coinValues[i];
+
+                // 해당 단위의 코인이 1개 이상 있을 경우
+                if (playerCoins[coinValues] > 0) {
+                    playerCoins[coinValues]--; // 5000코인 1개 감소
+                    playerCoins[Next_coin] += 5; // 1000코인 5개 추가
+
+                    alert("환전되었습니다."); // 환전 메시지 표시
+                    updatePlayerMoney(); // 플레이어의 금액 업데이트
+                }
+                else {
+                    console.log("환전할 수 있는 코인이 없습니다.");
+                }
+            }
         }
 
         window.onload = function () {
