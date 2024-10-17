@@ -360,7 +360,6 @@
             playerCards.push(drawCard());
             playerCards.push(drawCard());
             updatePlayerCards();
-            checkForBlackjack();
         }
 
         // 플레이어 카드 화면에 표시
@@ -476,7 +475,7 @@
                     dealerValue = calculateHandValue(dealerCards);
                     setTimeout(drawDealerCard, 1000); // 다음 카드를 받을 때까지 1초 딜레이
                 } else {
-                    determineWinner();
+                    checkForBlackjack();
                 }
             }
 
@@ -515,13 +514,14 @@
             // 플레이어와 딜러 모두 처음 2장의 카드로 21일 때
             if (playerValue === 21 && dealerValue === 21 && playerCards.length === 2 && dealerCards.length === 2) {
                 revealDealerCard();
+                playerMoney += betAmount;
                 displayResult("플레이어와 딜러 모두 BlackJack. 비겼습니다.");
                 dealCards();
             }
             // 플레이어가 블랙잭일 때 (처음 2장의 합이 21)
             else if (playerValue === 21 && playerCards.length === 2) {
                 displayResult("플레이어의 BlackJack. 플레이어가 이겼습니다.");
-                playerMoney += betAmount * 2.5; // 블랙잭 승리 보상 (1.5배)
+                playerMoney += Math.ceil(betAmount * 2.5); // 블랙잭 승리 보상 (1.5배)
                 updatePlayerMoney();
                 dealCards();
             }
@@ -529,9 +529,12 @@
             else if (dealerValue === 21 && dealerCards.length === 2) {
                 revealDealerCard();
                 displayResult("딜러의 BlackJack. 딜러가 이겼습니다.");
-                playerMoney -= betAmount * 1.5; // 플레이어는 베팅 금액만큼 잃음
+                playerMoney -= Math(betAmount * 1.5); // 플레이어는 베팅 금액만큼 잃음
                 updatePlayerMoney();
                 dealCards();
+            }
+            else{
+                determineWinner();
             }
         }
 
@@ -573,10 +576,6 @@
                 displayResult('플레이어의 금액이 탕진되었습니다.');
                 showRestartButton();
             }
-
-            // 버튼 재활성화
-            document.getElementById('double-btn').disabled = false;
-            document.getElementById('surrender-btn').disabled = false;
         }
 
         window.onload = function () {
