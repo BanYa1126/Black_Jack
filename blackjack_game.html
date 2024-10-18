@@ -208,15 +208,20 @@
 
         function updateCoinDisplay() {
             const coinContainer = document.getElementById('coin-container');
+            if (!coinContainer) {
+                console.error('Element with ID "coinContainer" not found.');
+                return;
+            }
             coinContainer.innerHTML = '';
 
-            // 플레이어 돈에 따라 코인 표시
-            let remainingMoney = playerMoney;
+            // 큰 단위의 코인부터 순서대로 표시하기 위해 coinCounts 객체를 정렬합니다.
+            const sortedCoinValues = Object.keys(coinCounts).map(Number).sort((a, b) => b - a);
 
-            // 큰 단위의 코인부터 순서대로 사용
-            coinValues.slice().reverse().forEach(value => {
-                const count = Math.floor(remainingMoney / value);
+            // coinCounts 객체를 순회하여 각 코인의 이미지를 업데이트합니다.
+            sortedCoinValues.forEach(value => {
+                const count = coinCounts[value];
                 if (count > 0) {
+                    // 코인 스택을 생성합니다.
                     const coinStack = document.createElement('div');
                     coinStack.classList.add('coin-stack');
                     coinStack.style.display = 'flex';
@@ -241,8 +246,8 @@
                         coinStack.appendChild(coin);
                     }
 
+                    // coinContainer에 coinStack을 추가합니다.
                     coinContainer.appendChild(coinStack);
-                    remainingMoney -= count * value; // 남은 금액 계산
                 }
             });
         }
@@ -250,24 +255,28 @@
         function resetBet() {
             playerMoney += betAmount;
             betAmount = 0;
-            updatePlayerMoney();
+            initializeCoinCounts();
             document.getElementById('current-bet').textContent = betAmount;
         }
 
         function updatePlayerMoney() {
             document.getElementById('player-money').textContent = playerMoney;
-            initializeCoinCounts();
-            updateCoinDisplay(); // 플레이어의 금액이 변경되면 코인도 업데이트
         }
 
         function placeBet(amount) {
-            if (playerMoney >= amount) {
+            if (playerMoney >= amount && coinCounts[amount] > 0) { // 코인 수가 0 이상이어야 함
                 betAmount += amount;
                 playerMoney -= amount;
+                coinCounts[amount]--; // 해당 코인의 수량 감소
+
+                // 만약 코인의 수가 0이면 코인 제거
+                if (coinCounts[amount] === 0) {
+                    delete coinCounts[amount];
+                }
 
                 // 베팅 후 플레이어의 잔액 및 코인 상태 업데이트
                 updatePlayerMoney();
-                updateCoinDisplay(); // 코인 수를 다시 업데이트하여 표시
+                updateCoinDisplay();
 
                 document.getElementById('current-bet').textContent = betAmount;
 
@@ -603,54 +612,6 @@
             }
         }
 
-        // HTML의 코인 이미지 요소에 대한 ID를 사용하여 코인의 이미지를 업데이트하는 로직을 추가합니다.
-        function updateCoinImages() {
-
-            const coinContainer = document.getElementById('coin-container');
-            if (!coinContainer) {
-                console.error('Element with ID "coinContainer" not found.');
-                return;
-            }
-            coinContainer.innerHTML = '';
-
-            // 큰 단위의 코인부터 순서대로 표시하기 위해 coinCounts 객체를 정렬합니다.
-            const sortedCoinValues = Object.keys(coinCounts).map(Number).sort((a, b) => b - a);
-
-            // coinCounts 객체를 순회하여 각 코인의 이미지를 업데이트합니다.
-            sortedCoinValues.forEach(value => {
-                const count = coinCounts[value];
-                if (count > 0) {
-                    // 코인 스택을 생성합니다.
-                    const coinStack = document.createElement('div');
-                    coinStack.classList.add('coin-stack');
-                    coinStack.style.display = 'flex';
-                    coinStack.style.flexDirection = 'column-reverse'; // 아래에서 위로 쌓이도록 설정
-                    coinStack.style.alignItems = 'center';
-                    coinStack.style.marginRight = '10px'; // 코인들 사이의 간격
-
-                    // 코인 이미지 하나를 추가하여 코인 값을 표시
-                    const coinLabel = document.createElement('div');
-                    coinLabel.textContent = `${value}$`;
-                    coinLabel.style.fontSize = '14px';
-                    coinLabel.style.color = 'white';
-                    coinStack.appendChild(coinLabel);
-
-                    // 해당 코인 수만큼 이미지 추가
-                    for (let i = 0; i < count; i++) {
-                        const coin = document.createElement('img');
-                        coin.src = `coins/${value}.png`;
-                        coin.alt = `${value} Coin`;
-                        coin.classList.add('coin');
-                        coin.onclick = () => placeBet(value);
-                        coinStack.appendChild(coin);
-                    }
-
-                    // coinContainer에 coinStack을 추가합니다.
-                    coinContainer.appendChild(coinStack);
-                }
-            });
-        }
-
         function exchangecoin() {
             // 가장 큰 단위의 코인을 분할하는 로직
             const availableCoins = Object.keys(coinCounts)
@@ -684,7 +645,7 @@
                     alert(`${largestValue} 코인이 ${nextSmallerValue} 코인 ${splitCount}개로 교환되었습니다.`);
                 }
             }
-            updateCoinImages();
+            updateCoinDisplay();
         }
 
         // ALL-IN 버튼 클릭 시 모든 금액을 베팅
@@ -708,7 +669,7 @@
             createDecks();
             dealCards();
             updatePlayerMoney();
-            updateCoinDisplay();
+            initializeCoinCounts();
             btnHide();
         }
     </script>
