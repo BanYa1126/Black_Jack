@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackjack Game</title>
     <style>
+        /* 전체 화면 스타일 설정 */
         body {
             font-family: Arial, sans-serif;
             background-color: #2c3e50;
@@ -19,6 +20,7 @@
             position: relative;
         }
 
+        /* 타이틀 스타일 설정 */
         h1 {
             position: absolute;
             top: 10px;
@@ -27,6 +29,7 @@
             width: 100%;
         }
 
+        /* 딜러 카드 위치 설정 */
         #dealer {
             display: flex;
             flex-direction: column;
@@ -35,6 +38,7 @@
             top: 60px;
         }
 
+        /* 플레이어 카드 위치 설정 */
         #player {
             display: flex;
             flex-direction: column;
@@ -50,6 +54,7 @@
             gap: 10px;
         }
 
+        /* 게임 컨트롤 버튼 위치 설정 */
         #controls {
             position: absolute;
             bottom: 20px;
@@ -58,12 +63,14 @@
             gap: 10px;
         }
 
+        /* 카드 이미지 설정 */
         .card {
             width: 100px;
             height: 140px;
             margin: 5px;
         }
 
+        /* 현재 베팅 금액 표시 위치 설정 */
         #bet-display {
             position: absolute;
             bottom: 300px;
@@ -72,6 +79,7 @@
             width: 100%;
         }
 
+        /* 게임 결과 텍스트 위치 설정 */
         #result-text {
             position: absolute;
             top: 350px;
@@ -80,6 +88,7 @@
             width: 100%;
         }
 
+        /* 코인 컨테이너 위치 설정 */
         #coin-container {
             position: absolute;
             left: 20px;
@@ -89,29 +98,34 @@
             gap: 10px;
         }
 
+        /* 코인 이미지 설정 */
         .coin {
             width: 50px;
             cursor: pointer;
         }
 
+        /* 리셋 버튼 위치 설정 */
         #reset-bet-btn {
             position: absolute;
             left: 20px;
             bottom: 20px;
         }
 
+        /* 코인 교환 버튼 위치 설정 */
         #exchange-coin-btn {
             position: absolute;
             left: 150px;
             bottom: 20px;
         }
 
+        /* 올인 버튼 위치 설정 */
         #allin-btn {
             position: absolute;
             left: 300px;
             bottom: 20px;
         }
 
+        /* 기본 버튼 스타일 설정 */
         button {
             padding: 10px 20px;
             background-color: #3498db;
@@ -122,6 +136,7 @@
             transition: background-color 0.3s ease;
         }
 
+        /* 버튼 호버 시 색상 변경 */
         button:hover {
             background-color: #2980b9;
         }
@@ -129,21 +144,26 @@
 </head>
 
 <body>
+    <!-- 게임 타이틀 -->
     <h1>Blackjack Game</h1>
 
+    <!-- 딜러 영역 -->
     <div id="dealer">
         <h2>Dealer</h2>
-        <div id="dealer-cards"></div>
+        <div id="dealer-cards"></div> <!-- 딜러의 카드가 표시될 영역 -->
     </div>
 
+    <!-- 플레이어 영역 -->
     <div id="player">
-        <h2>Player - $<span id="player-money"></span></h2>
-        <div id="player-cards"></div>
+        <h2>Player - $<span id="player-money"></span></h2> <!-- 플레이어의 현재 자금 표시 -->
+        <div id="player-cards"></div> <!-- 플레이어의 카드가 표시될 영역 -->
     </div>
 
+    <!-- 현재 베팅 금액 표시 영역 -->
     <div id="bet-display">Current Bet: $<span id="current-bet">0</span></div>
-    <div id="result-text"></div>
+    <div id="result-text"></div> <!-- 게임 결과 표시 -->
 
+    <!-- 게임 컨트롤 버튼 영역 -->
     <div id="controls">
         <button id="hit-btn" onclick="hit()">Hit</button>
         <button id="stay-btn" onclick="stay()">Stay</button>
@@ -157,9 +177,11 @@
     <button id="exchange-coin-btn" onclick="exchangecoin()">Exchange Coin</button>
     <button id="allin-btn" onclick="allIn()">ALL-IN</button>
 
+    <!-- 게임 재시작 버튼 (플레이어 파산 시 표시) -->
     <button id="restart-btn" style="display: none;" onclick="restartGame()">Restart Game</button>
 
     <script>
+        // 카드 뒷면 이미지 배열 (랜덤으로 선택하여 사용)
         const cardBacks = [
             "Back/Back_Side0.png",
             "Back/Back_Side1.png",
@@ -170,18 +192,19 @@
             "Back/Back_Side6.png",
             "Back/Back_Side7.png"
         ];
-        let cardBack;
-        let dealerCards = [];
-        let playerCards = [];
-        let playerMoney = Math.floor(Math.random() * 9000) + 1000;
-        let betAmount = 0;
-        let decks = [];
-        let gameCount = 0;
-        let currentDeckIndex = 0;
-        let currentDeck = [];
-        const coinValues = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
-        let coinCounts = {};
+        let cardBack; // 현재 사용할 카드 뒷면 이미지
+        let dealerCards = []; // 딜러의 카드 목록
+        let playerCards = []; // 플레이어의 카드 목록
+        let playerMoney = Math.floor(Math.random() * 9000) + 1000; // 플레이어의 초기 자금 (랜덤 1000~10000 사이)
+        let betAmount = 0; // 현재 베팅 금액
+        let decks = []; // 카드 덱 배열
+        let gameCount = 0; // 현재 게임 횟수
+        let currentDeckIndex = 0; // 현재 사용할 덱 인덱스
+        let currentDeck = []; // 현재 사용할 덱
+        const coinValues = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]; // 코인 값 목록
+        let coinCounts = {}; // 각 코인의 개수
 
+        // 게임 버튼 숨기기
         function btnHide() {
             document.getElementById('hit-btn').style.display = 'none';
             document.getElementById('stay-btn').style.display = 'none';
@@ -189,6 +212,7 @@
             document.getElementById('surrender-btn').style.display = 'none';
         }
 
+        // 게임 버튼 표시
         function showGameButtons() {
             document.getElementById('hit-btn').style.display = 'inline-block';
             document.getElementById('stay-btn').style.display = 'inline-block';
@@ -196,16 +220,19 @@
             document.getElementById('surrender-btn').style.display = 'inline-block';
         }
 
+        // Double Down과 Surrender 버튼 숨기기
         function hideDoubleAndSurrender() {
             document.getElementById('double-btn').style.display = 'none';
             document.getElementById('surrender-btn').style.display = 'none';
         }
 
+        // Hit과 Stay 버튼 표시
         function showHitAndStay() {
             document.getElementById('hit-btn').style.display = 'inline-block';
             document.getElementById('stay-btn').style.display = 'inline-block';
         }
 
+        // 코인 상태 업데이트 및 화면 표시
         function updateCoinDisplay() {
             const coinContainer = document.getElementById('coin-container');
             if (!coinContainer) {
@@ -214,14 +241,14 @@
             }
             coinContainer.innerHTML = '';
 
-            // 큰 단위의 코인부터 순서대로 표시하기 위해 coinCounts 객체를 정렬합니다.
+            // 큰 단위의 코인부터 순서대로 표시하기 위해 coinCounts 객체를 정렬
             const sortedCoinValues = Object.keys(coinCounts).map(Number).sort((a, b) => b - a);
 
-            // coinCounts 객체를 순회하여 각 코인의 이미지를 업데이트합니다.
+            // 각 코인의 이미지를 화면에 업데이트
             sortedCoinValues.forEach(value => {
                 const count = coinCounts[value];
                 if (count > 0) {
-                    // 코인 스택을 생성합니다.
+                    // 코인 스택 생성
                     const coinStack = document.createElement('div');
                     coinStack.classList.add('coin-stack');
                     coinStack.style.display = 'flex';
@@ -229,7 +256,7 @@
                     coinStack.style.alignItems = 'center';
                     coinStack.style.marginRight = '10px'; // 코인들 사이의 간격
 
-                    // 코인 이미지 하나를 추가하여 코인 값을 표시
+                    // 코인 값 표시
                     const coinLabel = document.createElement('div');
                     coinLabel.textContent = `${value}$`;
                     coinLabel.style.fontSize = '14px';
@@ -246,27 +273,31 @@
                         coinStack.appendChild(coin);
                     }
 
-                    // coinContainer에 coinStack을 추가합니다.
+                    // coinContainer에 coinStack 추가
                     coinContainer.appendChild(coinStack);
                 }
             });
         }
 
+        // 베팅 초기화 함수
         function resetBet() {
-            playerMoney += betAmount;
-            betAmount = 0;
-            initializeCoinCounts();
+            playerMoney += betAmount; // 플레이어 자금에 베팅 금액 반환
+            betAmount = 0; // 베팅 금액 초기화
+            updatePlayerMoney(); // 플레이어 자금 업데이트
+            initializeCoinCounts(); // 코인 수량 초기화
             document.getElementById('current-bet').textContent = betAmount;
         }
 
+        // 플레이어 자금 업데이트 함수
         function updatePlayerMoney() {
             document.getElementById('player-money').textContent = playerMoney;
         }
 
+        // 베팅 처리 함수
         function placeBet(amount) {
-            if (playerMoney >= amount && coinCounts[amount] > 0) { // 코인 수가 0 이상이어야 함
-                betAmount += amount;
-                playerMoney -= amount;
+            if (playerMoney >= amount && coinCounts[amount] > 0) { // 플레이어가 충분한 자금을 가지고 있고 해당 코인 수가 0보다 클 경우
+                betAmount += amount; // 베팅 금액 추가
+                playerMoney -= amount; // 플레이어 자금 차감
                 coinCounts[amount]--; // 해당 코인의 수량 감소
 
                 // 만약 코인의 수가 0이면 코인 제거
@@ -289,6 +320,7 @@
             }
         }
 
+        // 플레이어의 자금을 코인으로 초기화
         function initializeCoinCounts() {
             let remainingMoney = playerMoney;
             coinValues.slice().reverse().forEach(value => {
@@ -316,7 +348,7 @@
                 decks.push(deck);  // 덱 배열에 각 덱 추가
             }
 
-            shuffleDecks();
+            shuffleDecks(); // 카드 덱 섞기
             setCurrentDeck();  // 처음 사용할 덱 설정
         }
 
@@ -330,7 +362,7 @@
             });
         }
 
-        // 현재 덱 설정 및 덱 변경
+        // 현재 사용할 덱 설정
         function setCurrentDeck() {
             if (currentDeckIndex >= decks.length) {
                 currentDeckIndex = 0;  // 모든 덱을 다 사용했으면 다시 첫 번째 덱으로
@@ -343,7 +375,7 @@
 
         // 게임이 끝날 때 덱 변경 로직 실행
         function endGame() {
-            btnHide();
+            btnHide(); // 모든 게임 버튼 숨기기
             gameCount++;  // 게임 진행 횟수 증가
             if (gameCount >= 5) {  // 5번의 게임이 끝나면 덱을 변경
                 currentDeckIndex++;  // 다음 덱으로 이동
@@ -363,9 +395,8 @@
 
         // 게임이 종료되었을 때 실행될 함수 (딜러와 플레이어 모두의 승패 결정 후 호출)
         function gameResult() {
-            // 게임 결과 로직 처리
             endGame();  // 게임 종료 후 덱 변경 체크
-            betAmount = 0
+            betAmount = 0;
             document.getElementById('current-bet').textContent = betAmount;
         }
 
@@ -394,6 +425,7 @@
             });
         }
 
+        // 딜러 카드 화면에 표시
         function updateDealerCards() {
             const dealerCardsDiv = document.getElementById("dealer-cards");
             dealerCardsDiv.innerHTML = "";
@@ -402,10 +434,12 @@
             });
         }
 
+        // 게임 결과 텍스트 화면에 표시
         function displayResult(result) {
             document.getElementById('result-text').textContent = result;
         }
 
+        // 게임 재시작 버튼 화면에 표시
         function showRestartButton() {
             const restartBtn = document.getElementById('restart-btn');
             restartBtn.style.display = 'block'; // 버튼을 화면에 표시
@@ -427,6 +461,7 @@
             restartBtn.style.display = 'none';
         }
 
+        // Hit 버튼: 플레이어가 카드를 한 장 받음
         function hit() {
             playerCards.push(drawCard());
             updatePlayerCards();
@@ -441,15 +476,28 @@
 
         // Stay 버튼: 딜러의 로직 시작
         function stay() {
-            revealDealerCard();
-            setTimeout(dealerTurn, 1000);
+            const playerValue = calculateHandValue(playerCards);
+            // 플레이어가 블랙잭일 경우 즉시 승리 처리
+            if (playerValue === 21 && playerCards.length === 2) {
+                displayResult("플레이어의 BlackJack. 플레이어가 이겼습니다.");
+                playerMoney += Math.ceil(betAmount * 2.5); // 블랙잭 승리 보상 (1.5배)
+                betAmount = 0; // 베팅 금액 초기화
+                updatePlayerMoney();
+                initializeCoinCounts();
+                gameResult(); // 게임 종료 후 처리
+                dealCards();
+            } else {
+                // 블랙잭이 아닐 경우 딜러의 카드를 공개하고 딜러 차례 진행
+                revealDealerCard();
+                setTimeout(dealerTurn, 1000);
 
-            // Stay 이후 플레이어의 금액과 코인 상태 업데이트
-            updatePlayerMoney();
-            updateCoinDisplay(); // 즉시 코인 상태 업데이트
+                // Stay 이후 플레이어의 금액과 코인 상태 업데이트
+                updatePlayerMoney();
+                updateCoinDisplay(); // 즉시 코인 상태 업데이트
+            }
         }
 
-        // Double Down 버튼
+        // Double Down 버튼: 베팅 금액을 두 배로 늘리고 카드를 한 장 받음
         function doubleDown() {
             const additionalBet = betAmount; // 현재 베팅 금액 저장
 
@@ -473,7 +521,7 @@
             }
         }
 
-        // Surrender 버튼
+        // Surrender 버튼: 플레이어가 항복하고 베팅 금액의 절반을 돌려받음
         function surrender() {
             playerMoney += Math.floor(betAmount / 2); // 베팅 금액의 절반을 플레이어에게 반환
             betAmount = 0; // 베팅 금액 초기화
@@ -532,38 +580,16 @@
 
         // 블랙잭 체크
         function checkForBlackjack() {
-            const playerValue = calculateHandValue(playerCards);
-            const dealerValue = calculateHandValue(dealerCards);
 
-            // 플레이어와 딜러 모두 처음 2장의 카드로 21일 때
-            if (playerValue === 21 && dealerValue === 21 && playerCards.length === 2 && dealerCards.length === 2) {
-                revealDealerCard();
-                playerMoney += betAmount;
-                displayResult("플레이어와 딜러 모두 BlackJack. 비겼습니다.");
-                betAmount = 0; // 베팅 금액 초기화
-                updatePlayerMoney();
-                updateCoinDisplay();
-                gameResult(); // 게임 종료 후 처리
-                dealCards();
-            }
-            // 플레이어가 블랙잭일 때 (처음 2장의 합이 21)
-            else if (playerValue === 21 && playerCards.length === 2) {
-                displayResult("플레이어의 BlackJack. 플레이어가 이겼습니다.");
-                playerMoney += Math.ceil(betAmount * 2.5); // 블랙잭 승리 보상 (1.5배)
-                betAmount = 0; // 베팅 금액 초기화
-                updatePlayerMoney();
-                updateCoinDisplay();
-                gameResult(); // 게임 종료 후 처리
-                dealCards();
-            }
+            const dealerValue = calculateHandValue(dealerCards);
             // 딜러가 블랙잭일 때 (처음 2장의 합이 21)
-            else if (dealerValue === 21 && dealerCards.length === 2) {
+            if (dealerValue === 21 && dealerCards.length === 2) {
                 revealDealerCard();
                 displayResult("딜러의 BlackJack. 딜러가 이겼습니다.");
                 playerMoney -= Math.ceil(betAmount * 1.5); // 플레이어는 베팅 금액만큼 잃음
                 betAmount = 0; // 베팅 금액 초기화
                 updatePlayerMoney();
-                updateCoinDisplay();
+                initializeCoinCounts();
                 gameResult(); // 게임 종료 후 처리
                 dealCards();
             }
@@ -600,7 +626,7 @@
 
             betAmount = 0; // 베팅 금액 초기화
             updatePlayerMoney();
-            updateCoinDisplay();
+            initializeCoinCounts();
             displayResult(resultMessage);
             gameResult(); // 게임 종료 후 처리
             dealCards(); // 새로운 게임 시작
@@ -612,8 +638,8 @@
             }
         }
 
+        // 코인 교환 (큰 단위의 코인을 작은 단위로 분할)
         function exchangecoin() {
-            // 가장 큰 단위의 코인을 분할하는 로직
             const availableCoins = Object.keys(coinCounts)
                 .map(Number)
                 .filter(value => coinCounts[value] > 0);
@@ -656,6 +682,7 @@
 
                 // 베팅 후 업데이트
                 updatePlayerMoney();
+                initializeCoinCounts();
                 document.getElementById('current-bet').textContent = betAmount;
 
                 // 게임 버튼 표시
@@ -665,12 +692,13 @@
             }
         }
 
+        // 페이지 로드 시 초기 설정 함수 호출
         window.onload = function () {
-            createDecks();
-            dealCards();
-            updatePlayerMoney();
-            initializeCoinCounts();
-            btnHide();
+            createDecks(); // 덱 생성 및 섞기
+            dealCards(); // 카드 나누기
+            updatePlayerMoney(); // 플레이어 금액 초기화
+            initializeCoinCounts(); // 코인 초기화
+            btnHide(); // 게임 버튼 숨기기
         }
     </script>
 </body>
