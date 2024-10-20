@@ -493,7 +493,7 @@
 
                 // Stay 이후 플레이어의 금액과 코인 상태 업데이트
                 updatePlayerMoney();
-                updateCoinDisplay(); // 즉시 코인 상태 업데이트
+                initializeCoinCounts(); // 즉시 코인 상태 업데이트
             }
         }
 
@@ -514,7 +514,7 @@
 
                 // Double Down 이후 플레이어의 금액과 코인 상태 업데이트
                 updatePlayerMoney();
-                updateCoinDisplay(); // 즉시 코인 상태 업데이트
+                initializeCoinCounts(); // 즉시 코인 상태 업데이트
             } else {
                 // 잔액이 부족할 경우 경고 메시지 표시
                 alert('더 이상 베팅할 칩이 없습니다.');
@@ -527,8 +527,9 @@
             betAmount = 0; // 베팅 금액 초기화
             displayResult('Surrender! 베팅 금액의 절반을 돌려받습니다.');
             updatePlayerMoney();
-            updateCoinDisplay(); // 즉시 코인 상태 업데이트
-            dealCards(); // 새로운 카드 배분으로 게임 재시작
+            initializeCoinCounts(); // 즉시 코인 상태 업데이트
+            gameResult(); // 게임 종료 후 처리
+            dealCards();
         }
 
         // 딜러의 두 번째 카드 공개
