@@ -452,7 +452,7 @@
             document.getElementById('current-bet').textContent = betAmount;
             document.getElementById('result-text').textContent = '';
             document.getElementById('player-money').textContent = playerMoney;
-            updateCoinDisplay(); // 초기 코인 상태로 업데이트
+            initializeCoinCounts(); // 초기 코인 상태로 업데이트
             createDecks(); // 새로운 카드 덱 생성 및 섞기
             dealCards(); // 새로운 카드 배분으로 게임 재시작
 
