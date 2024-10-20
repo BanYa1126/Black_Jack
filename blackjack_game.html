@@ -166,7 +166,7 @@
     <!-- 게임 컨트롤 버튼 영역 -->
     <div id="controls">
         <button id="hit-btn" onclick="hit()">Hit</button>
-        <button id="stay-btn" onclick="stay()">Stay</button>
+        <button id="stand-btn" onclick="stand()">Stand</button>
         <button id="double-btn" onclick="doubleDown()">Double Down</button>
         <button id="surrender-btn" onclick="surrender()">Surrender</button>
     </div>
@@ -207,7 +207,7 @@
         // 게임 버튼 숨기기
         function btnHide() {
             document.getElementById('hit-btn').style.display = 'none';
-            document.getElementById('stay-btn').style.display = 'none';
+            document.getElementById('stand-btn').style.display = 'none';
             document.getElementById('double-btn').style.display = 'none';
             document.getElementById('surrender-btn').style.display = 'none';
         }
@@ -215,7 +215,7 @@
         // 게임 버튼 표시
         function showGameButtons() {
             document.getElementById('hit-btn').style.display = 'inline-block';
-            document.getElementById('stay-btn').style.display = 'inline-block';
+            document.getElementById('stand-btn').style.display = 'inline-block';
             document.getElementById('double-btn').style.display = 'inline-block';
             document.getElementById('surrender-btn').style.display = 'inline-block';
         }
@@ -226,10 +226,10 @@
             document.getElementById('surrender-btn').style.display = 'none';
         }
 
-        // Hit과 Stay 버튼 표시
-        function showHitAndStay() {
+        // Hit과 Stand 버튼 표시
+        function showHitAndStand() {
             document.getElementById('hit-btn').style.display = 'inline-block';
-            document.getElementById('stay-btn').style.display = 'inline-block';
+            document.getElementById('stand-btn').style.display = 'inline-block';
         }
 
         // 코인 상태 업데이트 및 화면 표시
@@ -470,12 +470,12 @@
             hideDoubleAndSurrender();
 
             if (calculateHandValue(playerCards) >= 21) {
-                stay(); // 21 이상이면 자동으로 Stay 처리
+                stand(); // 21 이상이면 자동으로 Stand 처리
             }
         }
 
-        // Stay 버튼: 딜러의 로직 시작
-        function stay() {
+        // Stand 버튼: 딜러의 로직 시작
+        function stand() {
             const playerValue = calculateHandValue(playerCards);
             // 플레이어가 블랙잭일 경우 즉시 승리 처리
             if (playerValue === 21 && playerCards.length === 2) {
@@ -491,7 +491,7 @@
                 revealDealerCard();
                 setTimeout(dealerTurn, 1000);
 
-                // Stay 이후 플레이어의 금액과 코인 상태 업데이트
+                // Stand 이후 플레이어의 금액과 코인 상태 업데이트
                 updatePlayerMoney();
                 initializeCoinCounts(); // 즉시 코인 상태 업데이트
             }
@@ -509,7 +509,7 @@
                 updatePlayerCards();
                 revealDealerCard();
 
-                // Double Down 이후 Stay 처리
+                // Double Down 이후 Stand 처리
                 setTimeout(dealerTurn, 1000);
 
                 // Double Down 이후 플레이어의 금액과 코인 상태 업데이트
