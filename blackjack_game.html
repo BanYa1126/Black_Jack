@@ -79,15 +79,6 @@
             width: 100%;
         }
 
-        /* 게임 결과 텍스트 위치 설정 */
-        #result-text {
-            position: absolute;
-            top: 350px;
-            font-size: 24px;
-            text-align: center;
-            width: 100%;
-        }
-
         /* 코인 컨테이너 위치 설정 */
         #coin-container {
             position: absolute;
@@ -161,7 +152,6 @@
 
     <!-- 현재 베팅 금액 표시 영역 -->
     <div id="bet-display">Current Bet: $<span id="current-bet">0</span></div>
-    <div id="result-text"></div> <!-- 게임 결과 표시 -->
 
     <!-- 게임 컨트롤 버튼 영역 -->
     <div id="controls">
@@ -285,6 +275,7 @@
             betAmount = 0; // 베팅 금액 초기화
             updatePlayerMoney(); // 플레이어 자금 업데이트
             initializeCoinCounts(); // 코인 수량 초기화
+            btnHide();
             document.getElementById('current-bet').textContent = betAmount;
         }
 
@@ -434,11 +425,6 @@
             });
         }
 
-        // 게임 결과 텍스트 화면에 표시
-        function displayResult(result) {
-            document.getElementById('result-text').textContent = result;
-        }
-
         // 게임 재시작 버튼 화면에 표시
         function showRestartButton() {
             const restartBtn = document.getElementById('restart-btn');
@@ -450,7 +436,7 @@
             playerMoney = Math.floor(Math.random() * 9000) + 1000; // 플레이어의 초기 금액 재설정
             betAmount = 0;
             document.getElementById('current-bet').textContent = betAmount;
-            document.getElementById('result-text').textContent = '';
+            alert("게임을 재시작합니다.")
             document.getElementById('player-money').textContent = playerMoney;
             initializeCoinCounts(); // 초기 코인 상태로 업데이트
             createDecks(); // 새로운 카드 덱 생성 및 섞기
@@ -479,7 +465,7 @@
             const playerValue = calculateHandValue(playerCards);
             // 플레이어가 블랙잭일 경우 즉시 승리 처리
             if (playerValue === 21 && playerCards.length === 2) {
-                displayResult("플레이어의 BlackJack. 플레이어가 이겼습니다.");
+                alert("플레이어의 BlackJack. 플레이어가 이겼습니다.");
                 playerMoney += Math.ceil(betAmount * 2.5); // 블랙잭 승리 보상 (1.5배)
                 betAmount = 0; // 베팅 금액 초기화
                 updatePlayerMoney();
@@ -505,6 +491,7 @@
             if (playerMoney >= additionalBet) {
                 playerMoney -= additionalBet; // 추가 베팅 금액만큼 차감
                 betAmount *= 2; // 기존 베팅 금액을 두 배로 설정
+                document.getElementById('current-bet').textContent = betAmount;
                 playerCards.push(drawCard());
                 updatePlayerCards();
                 revealDealerCard();
@@ -525,7 +512,7 @@
         function surrender() {
             playerMoney += Math.floor(betAmount / 2); // 베팅 금액의 절반을 플레이어에게 반환
             betAmount = 0; // 베팅 금액 초기화
-            displayResult('Surrender! 베팅 금액의 절반을 돌려받습니다.');
+            alert('Surrender! 베팅 금액의 절반을 돌려받습니다.');
             updatePlayerMoney();
             initializeCoinCounts(); // 즉시 코인 상태 업데이트
             gameResult(); // 게임 종료 후 처리
@@ -586,7 +573,7 @@
             // 딜러가 블랙잭일 때 (처음 2장의 합이 21)
             if (dealerValue === 21 && dealerCards.length === 2) {
                 revealDealerCard();
-                displayResult("딜러의 BlackJack. 딜러가 이겼습니다.");
+                alert("딜러의 BlackJack. 딜러가 이겼습니다.");
                 playerMoney -= Math.ceil(betAmount * 1.5); // 플레이어는 베팅 금액만큼 잃음
                 betAmount = 0; // 베팅 금액 초기화
                 updatePlayerMoney();
@@ -628,13 +615,13 @@
             betAmount = 0; // 베팅 금액 초기화
             updatePlayerMoney();
             initializeCoinCounts();
-            displayResult(resultMessage);
+            alert(resultMessage);
             gameResult(); // 게임 종료 후 처리
             dealCards(); // 새로운 게임 시작
 
             // 플레이어의 금액이 0이 되었는지 확인하여 처리
             if (playerMoney === 0) {
-                displayResult('플레이어의 칩이 없어 파산하였습니다.');
+                alert('플레이어의 칩이 없어 파산하였습니다.');
                 showRestartButton();
             }
         }
