@@ -396,14 +396,13 @@
             dealerCards = [];
             playerCards = [];
             dealerCards.push(drawCard());
+            playerCards.push(drawCard());
             dealerCards.push(drawCard());
+            playerCards.push(drawCard());
             document.getElementById("dealer-cards").innerHTML = `
                 <img class="card" src="${dealerCards[0].img}" alt="dealer card">
                 <img class="card" src="${cardBack}" alt="dealer card back">
             `;
-
-            playerCards.push(drawCard());
-            playerCards.push(drawCard());
             updatePlayerCards();
         }
 
