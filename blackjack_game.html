@@ -577,13 +577,15 @@
                 playerMoney -= Math.ceil(betAmount * 1.5); // 플레이어는 베팅 금액만큼 잃음
                 betAmount = 0; // 베팅 금액 초기화
                 updatePlayerMoney();
-                initializeCoinCounts();
-                gameResult(); // 게임 종료 후 처리
-                dealCards();
                 // 플레이어의 금액이 0이 되었는지 확인하여 처리
                 if (playerMoney === 0) {
                     alert('플레이어의 칩이 없어 파산하였습니다.');
                     showRestartButton();
+                }
+                else {
+                    initializeCoinCounts();
+                    gameResult(); // 게임 종료 후 처리
+                    dealCards();
                 }
             }
             else {
