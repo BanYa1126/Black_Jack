@@ -279,6 +279,7 @@
             initializeCoinCounts(); // 코인 수량 초기화
             btnHide();
             document.getElementById('current-bet').textContent = betAmount;
+            document.getElementById('complete-bet-btn').style.display = 'none';
         }
 
         // 플레이어 자금 업데이트 함수
@@ -699,9 +700,7 @@
                 updatePlayerMoney();
                 initializeCoinCounts();
                 document.getElementById('current-bet').textContent = betAmount;
-
-                // 게임 버튼 표시
-                showGameButtons();
+                document.getElementById('complete-bet-btn').style.display = 'block';
             } else {
                 alert('베팅할 돈이 없습니다.');
             }
