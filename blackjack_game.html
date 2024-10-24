@@ -116,12 +116,6 @@
             bottom: 20px;
         }
 
-        #complete-bet-btn {
-            position: absolute;
-            bottom: 150px;
-            display: none;
-        }
-
         /* 기본 버튼 스타일 설정 */
         button {
             padding: 10px 20px;
@@ -172,7 +166,6 @@
     <button id="reset-bet-btn" onclick="resetBet()">Reset Betting</button>
     <button id="exchange-coin-btn" onclick="exchangecoin()">Exchange Coin</button>
     <button id="allin-btn" onclick="allIn()">ALL-IN</button>
-    <button id="complete-bet-btn" onclick="completeBetting()">Complete Betting</button>
 
     <!-- 게임 재시작 버튼 (플레이어 파산 시 표시) -->
     <button id="restart-btn" style="display: none;" onclick="restartGame()">Restart Game</button>
@@ -228,14 +221,14 @@
             document.getElementById('hit-btn').style.display = 'inline-block';
             document.getElementById('stand-btn').style.display = 'inline-block';
         }
-
-        function hideBettingbtn() {
+        
+        function hideBettingbtn(){
             document.getElementById('reset-bet-btn').style.display = 'none';
             document.getElementById('exchange-coin-btn').style.display = 'none';
             document.getElementById('allin-btn').style.display = 'none';
         }
 
-        function showBettingbtn() {
+        function showBettingbtn(){
             document.getElementById('reset-bet-btn').style.display = 'inline-block';
             document.getElementById('exchange-coin-btn').style.display = 'inline-block';
             document.getElementById('allin-btn').style.display = 'inline-block';
@@ -414,23 +407,16 @@
         function dealCards() {
             dealerCards = [];
             playerCards = [];
-
-            // 딜러와 플레이어의 카드를 뽑아 저장하지만, 화면에는 뒷면만 표시
             dealerCards.push(drawCard());
-            playerCards.push(drawCard());
             dealerCards.push(drawCard());
-            playerCards.push(drawCard());
-
             document.getElementById("dealer-cards").innerHTML = `
-        <img class="card" src="${cardBack}" alt="dealer card back">
-        <img class="card" src="${cardBack}" alt="dealer card back"> `;
+                <img class="card" src="${dealerCards[0].img}" alt="dealer card">
+                <img class="card" src="${cardBack}" alt="dealer card back">
+            `;
 
-            document.getElementById("player-cards").innerHTML = `
-        <img class="card" src="${cardBack}" alt="player card back">
-        <img class="card" src="${cardBack}" alt="player card back"> `;
-
-            // 게임 버튼을 비활성화
-            btnHide();
+            playerCards.push(drawCard());
+            playerCards.push(drawCard());
+            updatePlayerCards();
         }
 
         // 플레이어 카드 화면에 표시
@@ -452,15 +438,6 @@
         }
 
         // 게임 재시작 버튼 화면에 표시
-        function revealInitialCards() {
-            // 딜러의 첫 번째 카드와 플레이어의 모든 카드 공개
-            document.getElementById("dealer-cards").innerHTML = `
-        <img class="card" src="${dealerCards[0].img}" alt="dealer card">
-        <img class="card" src="${cardBack}" alt="dealer card back">
-    `;
-            updatePlayerCards();
-        } 
-        
         function showRestartButton() {
             const restartBtn = document.getElementById('restart-btn');
             restartBtn.style.display = 'block'; // 버튼을 화면에 표시
@@ -718,14 +695,6 @@
             } else {
                 alert('베팅할 돈이 없습니다.');
             }
-        }
-
-        function completeBetting() {
-            hideBettingbtn();
-            document.getElementById('complete-bet-btn').style.display = 'none';
-
-            revealInitialCards();
-            showGameButtons();
         }
 
         // 페이지 로드 시 초기 설정 함수 호출
