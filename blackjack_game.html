@@ -221,6 +221,18 @@
             document.getElementById('hit-btn').style.display = 'inline-block';
             document.getElementById('stand-btn').style.display = 'inline-block';
         }
+        
+        function hideBettingbtn(){
+            document.getElementById('reset-bet-btn').style.display = 'none';
+            document.getElementById('exchange-coin-btn').style.display = 'none';
+            document.getElementById('allin-btn').style.display = 'none';
+        }
+
+        function showBettingbtn(){
+            document.getElementById('reset-bet-btn').style.display = 'inline-block';
+            document.getElementById('exchange-coin-btn').style.display = 'inline-block';
+            document.getElementById('allin-btn').style.display = 'inline-block';
+        }
 
         // 코인 상태 업데이트 및 화면 표시
         function updateCoinDisplay() {
