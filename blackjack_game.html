@@ -167,6 +167,8 @@
     <button id="exchange-coin-btn" onclick="exchangecoin()">Exchange Coin</button>
     <button id="allin-btn" onclick="allIn()">ALL-IN</button>
 
+    <button id="complete-bet-btn" style="display : none" onclick="completeBetting()">Complete Betting</button>
+
     <!-- 게임 재시작 버튼 (플레이어 파산 시 표시) -->
     <button id="restart-btn" style="display: none;" onclick="restartGame()">Restart Game</button>
 
@@ -302,9 +304,9 @@
 
                 document.getElementById('current-bet').textContent = betAmount;
 
-                // 베팅 금액이 0보다 크면 게임 버튼 표시
+                // 베팅 금액이 0보다 크면 Complete Betting 버튼 표시
                 if (betAmount > 0) {
-                    showGameButtons();
+                    document.getElementById('complete-bet-btn').style.display = 'block';
                 }
             } else {
                 alert('더 이상 베팅할 칩이 없습니다.');
@@ -364,6 +366,11 @@
             gameCount = 0;  // 게임 횟수 초기화
         }
 
+        function removeCards() {
+            document.getElementById("dealer-cards").innerHTML = ''; // 딜러 카드 제거
+            document.getElementById("player-cards").innerHTML = ''; // 플레이어 카드 제거
+        }
+
         // 게임이 끝날 때 덱 변경 로직 실행
         function endGame() {
             btnHide(); // 모든 게임 버튼 숨기기
@@ -387,6 +394,7 @@
         // 게임이 종료되었을 때 실행될 함수 (딜러와 플레이어 모두의 승패 결정 후 호출)
         function gameResult() {
             endGame();  // 게임 종료 후 덱 변경 체크
+            removeCards();
             betAmount = 0;
             document.getElementById('current-bet').textContent = betAmount;
         }
@@ -439,7 +447,6 @@
             document.getElementById('player-money').textContent = playerMoney;
             initializeCoinCounts(); // 초기 코인 상태로 업데이트
             createDecks(); // 새로운 카드 덱 생성 및 섞기
-            dealCards(); // 새로운 카드 배분으로 게임 재시작
 
             // 게임 재시작 버튼 숨기기
             const restartBtn = document.getElementById('restart-btn');
@@ -470,7 +477,6 @@
                 updatePlayerMoney();
                 initializeCoinCounts();
                 gameResult(); // 게임 종료 후 처리
-                dealCards();
             } else {
                 // 블랙잭이 아닐 경우 딜러의 카드를 공개하고 딜러 차례 진행
                 revealDealerCard();
@@ -515,7 +521,6 @@
             updatePlayerMoney();
             initializeCoinCounts(); // 즉시 코인 상태 업데이트
             gameResult(); // 게임 종료 후 처리
-            dealCards();
         }
 
         // 딜러의 두 번째 카드 공개
@@ -578,7 +583,6 @@
                 updatePlayerMoney();
                 initializeCoinCounts();
                 gameResult(); // 게임 종료 후 처리
-                dealCards();
                 // 플레이어의 금액이 0이 되었는지 확인하여 처리
                 if (playerMoney === 0) {
                     alert('플레이어의 칩이 없어 파산하였습니다.');
@@ -621,7 +625,6 @@
             initializeCoinCounts();
             alert(resultMessage);
             gameResult(); // 게임 종료 후 처리
-            dealCards(); // 새로운 게임 시작
 
             // 플레이어의 금액이 0이 되었는지 확인하여 처리
             if (playerMoney === 0) {
@@ -666,6 +669,26 @@
             updateCoinDisplay();
         }
 
+        // 베팅 완료 후 실행되는 함수
+        function completeBetting() {
+            // 베팅 관련 버튼 비활성화
+            document.getElementById('reset-bet-btn').disabled = true;
+            document.getElementById('exchange-coin-btn').disabled = true;
+            document.getElementById('allin-btn').disabled = true;
+            document.getElementById('complete-bet-btn').style.display = 'none';
+
+            // 코인 클릭 이벤트 제거
+            const coins = document.querySelectorAll('.coin');
+            coins.forEach(coin => {
+                coin.onclick = null;
+                coin.style.cursor = 'default';
+            });
+
+            // 게임 버튼 활성화
+            showGameButtons();
+            dealCards();
+        }
+
         // ALL-IN 버튼 클릭 시 모든 금액을 베팅
         function allIn() {
             if (playerMoney > 0) {
@@ -687,7 +710,6 @@
         // 페이지 로드 시 초기 설정 함수 호출
         window.onload = function () {
             createDecks(); // 덱 생성 및 섞기
-            dealCards(); // 카드 나누기
             updatePlayerMoney(); // 플레이어 금액 초기화
             initializeCoinCounts(); // 코인 초기화
             btnHide(); // 게임 버튼 숨기기
