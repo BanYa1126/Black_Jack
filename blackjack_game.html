@@ -395,6 +395,9 @@
         // 게임이 종료되었을 때 실행될 함수 (딜러와 플레이어 모두의 승패 결정 후 호출)
         function gameResult() {
             endGame();  // 게임 종료 후 덱 변경 체크
+            document.getElementById('reset-bet-btn').disabled = false;
+            document.getElementById('exchange-coin-btn').disabled = false;
+            document.getElementById('allin-btn').disabled = false;
             removeCards();
             betAmount = 0;
             document.getElementById('current-bet').textContent = betAmount;
