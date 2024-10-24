@@ -580,6 +580,11 @@
                 initializeCoinCounts();
                 gameResult(); // 게임 종료 후 처리
                 dealCards();
+                // 플레이어의 금액이 0이 되었는지 확인하여 처리
+                if (playerMoney === 0) {
+                    alert('플레이어의 칩이 없어 파산하였습니다.');
+                    showRestartButton();
+                }
             }
             else {
                 determineWinner();
